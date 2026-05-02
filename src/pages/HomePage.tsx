@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { buildMapUrl, buildRestaurantSchema } from '@/lib/schema';
-import { heroContent, locations, menuGroups, signatureDishes } from '@/data/restaurant';
+import { signatureDishes, menuGroups } from '@/data/restaurant';
+import { agrobesoSupabase as supabase } from '../integrations/supabase/agrobeso-client';
 
 const navItems = [
   { label: 'Menu', href: '#menu' },
@@ -9,8 +11,6 @@ const navItems = [
   { label: 'Reserve', href: '#ordering' }
 ];
 
-const peckham = locations[0];
-const thorntonHeath = locations[1];
 
 const dishStories: Record<string, { story: string; note: string }> = {
   'Jollof Rice': {
