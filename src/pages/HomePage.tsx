@@ -3,12 +3,14 @@ import { buildMapUrl, buildRestaurantSchema } from '@/lib/schema';
 import { signatureDishes, menuGroups } from '@/data/restaurant';
 import { agrobesoSupabase as supabase } from '../integrations/supabase/agrobeso-client';
 
+const STORAGE_URL = 'https://lsgxrluiwsxuhsjcvdue.supabase.co/storage/v1/object/public/images';
+
 const navItems = [
   { label: 'Menu', href: '#menu' },
   { label: 'Locations', href: '#locations' },
   { label: 'Heritage', href: '#about' },
   { label: 'Gallery', href: '#gallery' },
-  { label: 'Reserve', href: '#ordering' }
+  { label: 'Reserve', href: '#ordering' },
 ];
 
 const defaultContent: Record<string, string> = {
@@ -22,7 +24,6 @@ const defaultContent: Record<string, string> = {
   menu_headline: 'A short list, cooked properly.',
   menu_subtext: 'Each dish is a chapter. The full menu lives in our kitchens — call ahead for daily specials.',
   menu_footer_note: 'Prices vary by season and branch. Please call ahead for current pricing and availability.',
-  // Dish stories — editable from Admin dashboard
   dish_jollof_rice_story: 'Long-grain rice slow-simmered in tomato, scotch bonnet and bay until each grain is its own quiet event.',
   dish_jollof_rice_note: 'A dish of celebration',
   dish_waakye_story: 'Rice and beans cooked with sorghum leaves for that deep, unmistakable hue. Served with shito and fried plantain.',
@@ -62,7 +63,6 @@ const defaultContent: Record<string, string> = {
   instagram_url: '#',
 };
 
-// Map dish name to content key prefix
 const dishKeyMap: Record<string, string> = {
   'Jollof Rice': 'dish_jollof_rice',
   'Waakye': 'dish_waakye',
@@ -74,9 +74,24 @@ const dishKeyMap: Record<string, string> = {
   'Tuo Zaafi': 'dish_tuo_zaafi',
 };
 
+// Map dish name to slug for image lookup
+const dishSlugMap: Record<string, string> = {
+  'Jollof Rice': 'jollof_rice',
+  'Waakye': 'waakye',
+  'Kenkey & Fish': 'kenkey_fish',
+  'Banku & Okra Stew': 'banku_okra',
+  'Peanut Soup': 'peanut_soup',
+  'Fufu / Pounded Yam': 'fufu',
+  'Fried Fish / Tilapia': 'fried_fish',
+  'Tuo Zaafi': 'tuo_zaafi',
+};
+
 export const HomePage = () => {
   const schema = buildRestaurantSchema();
   const [c, setC] = useState<Record<string, string>>(defaultContent);
+  const [dishImgs, setDishImgs] = useState<Record<string, string>>({});
+  const [galleryImgs, setGalleryImgs] = useState<string[]>([]);
+  const [heroImg, setHeroImg] = useState<string>('');
 
   useEffect(() => {
     supabase
@@ -85,14 +100,77 @@ export const HomePage = () => {
       .then(({ data }) => {
         if (data && data.length > 0) {
           const map: Record<string, string> = { ...defaultContent };
-          data.forEach((row: { id: string; value: string }) => { map[row.id] = row.value; });
+          const designTokens: Record<string, string> = {};
+          const dishImageMap: Record<string, string> = {};
+
+          data.forEach((row: { id: string; value: string }) => {
+            if (row.id.startsWith('design__')) {
+              designTokens[row.id.replace('design__', '')] = row.value;
+            } else if (row.id.startsWith('dish_img__')) {
+              dishImageMap[row.id.replace('dish_img__', '')] = row.value;
+            } else {
+              map[row.id] = row.value;
+            }
+          });
+
           setC(map);
+          setDishImgs(dishImageMap);
+
+          // Apply design tokens as CSS custom properties
+          const root = document.documentElement;
+          if (designTokens.color_primary) root.style.setProperty('--color-primary', designTokens.color_primary);
+          if (designTokens.color_secondary) root.style.setProperty('--color-secondary', designTokens.color_secondary);
+          if (designTokens.color_accent) root.style.setProperty('--color-accent', designTokens.color_accent);
+          if (designTokens.color_background) root.style.setProperty('--color-bg', designTokens.color_background);
+          if (designTokens.color_text) root.style.setProperty('--color-text', designTokens.color_text);
+          if (designTokens.font_heading) root.style.setProperty('--font-heading', designTokens.font_heading);
+          if (designTokens.font_body) root.style.setProperty('--font-body', designTokens.font_body);
+          if (designTokens.border_radius) root.style.setProperty('--radius', designTokens.border_radius + 'px');
+        }
+      });
+
+    // Load gallery images from Supabase storage (gallery category)
+    supabase.storage.from('images').list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
+      .then(({ data }) => {
+        if (data) {
+          const galleryFiles = data
+            .filter((f: any) => f.name && (f.name.startsWith('gallery-') || f.name.startsWith('hero-')) && f.name !== '.emptyFolderPlaceholder')
+            .map((f: any) => STORAGE_URL + '/' + f.name);
+
+          const heroFiles = data
+            .filter((f: any) => f.name && f.name.startsWith('hero-') && f.name !== '.emptyFolderPlaceholder')
+            .map((f: any) => STORAGE_URL + '/' + f.name);
+
+          const galleryOnlyFiles = data
+            .filter((f: any) => f.name && f.name.startsWith('gallery-') && f.name !== '.emptyFolderPlaceholder')
+            .map((f: any) => STORAGE_URL + '/' + f.name);
+
+          if (heroFiles.length > 0) setHeroImg(heroFiles[0]);
+          if (galleryOnlyFiles.length > 0) setGalleryImgs(galleryOnlyFiles);
         }
       });
   }, []);
 
-  const peckham = { id: 'peckham' as const, shortName: 'Peckham', address: c.peckham_address, phoneLabel: c.peckham_phone_label, phoneHref: c.peckham_phone_href, mapsQuery: c.peckham_address, openingHoursPlaceholder: c.peckham_hours };
-  const thorntonHeath = { id: 'thornton-heath' as const, shortName: 'Thornton Heath', address: c.thorntonheath_address, phoneLabel: c.thorntonheath_phone_label, phoneHref: c.thorntonheath_phone_href, mapsQuery: c.thorntonheath_address, openingHoursPlaceholder: c.thorntonheath_hours };
+  const peckham = {
+    id: 'peckham' as const,
+    shortName: 'Peckham',
+    address: c.peckham_address,
+    phoneLabel: c.peckham_phone_label,
+    phoneHref: c.peckham_phone_href,
+    mapsQuery: c.peckham_address,
+    openingHoursPlaceholder: c.peckham_hours,
+  };
+
+  const thorntonHeath = {
+    id: 'thornton-heath' as const,
+    shortName: 'Thornton Heath',
+    address: c.thorntonheath_address,
+    phoneLabel: c.thorntonheath_phone_label,
+    phoneHref: c.thorntonheath_phone_href,
+    mapsQuery: c.thorntonheath_address,
+    openingHoursPlaceholder: c.thorntonheath_hours,
+  };
+
   const locations = [peckham, thorntonHeath];
 
   return (
@@ -101,12 +179,18 @@ export const HomePage = () => {
         <div className="section-shell flex items-center justify-between py-5">
           <a href="#top" className="font-display text-2xl font-light tracking-tightest text-brand-cocoa">Agrobeso</a>
           <nav className="hidden items-center gap-10 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/70 md:flex">
-            {navItems.map((item) => (<a key={item.label} href={item.href} className="transition hover:text-brand-clay">{item.label}</a>))}
+            {navItems.map((item) => (
+              <a key={item.label} href={item.href} className="transition hover:text-brand-clay">{item.label}</a>
+            ))}
           </nav>
-          <a href="#ordering" className="hidden font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa md:inline-flex md:items-center md:gap-2 md:border-b md:border-brand-cocoa md:pb-1">Reserve <span aria-hidden>&rarr;</span></a>
+          <a href="#ordering" className="hidden font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa md:inline-flex md:items-center md:gap-2 md:border-b md:border-brand-cocoa md:pb-1">
+            Reserve <span aria-hidden>&rarr;</span>
+          </a>
         </div>
       </header>
+
       <main id="top">
+        {/* HERO */}
         <section className="hero-pattern relative overflow-hidden">
           <div className="section-shell grid min-h-[88vh] grid-cols-1 items-center gap-16 py-24 lg:grid-cols-12 lg:gap-8">
             <div className="lg:col-span-7 reveal">
@@ -117,32 +201,54 @@ export const HomePage = () => {
               </h1>
               <p className="mt-12 max-w-md font-display text-xl italic text-brand-cocoa/70">{c.hero_subheadline}</p>
               <div className="mt-12 flex flex-wrap items-center gap-8">
-                <a href="#menu" className="font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa"><span className="border-b border-brand-cocoa pb-1">View the menu</span></a>
+                <a href="#menu" className="font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa">
+                  <span className="border-b border-brand-cocoa pb-1">View the menu</span>
+                </a>
                 <a href="#ordering" className="font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60 transition hover:text-brand-clay">Reserve a table &rarr;</a>
               </div>
             </div>
             <div className="lg:col-span-5">
-              <div className="canvas-img-dark aspect-[4/5] w-full overflow-hidden">
-                <div className="flex h-full flex-col justify-end p-10 text-brand-bone">
-                  <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/70">No. 01 / Of the season</p>
-                  <p className="mt-4 font-display text-3xl italic">{c.hero_featured_dish}</p>
+              {heroImg ? (
+                <div className="aspect-[4/5] w-full overflow-hidden rounded-lg relative">
+                  <img src={heroImg} alt="Agrobeso hero" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-10 text-brand-bone">
+                    <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/70">No. 01 / Of the season</p>
+                    <p className="mt-4 font-display text-3xl italic">{c.hero_featured_dish}</p>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="canvas-img-dark aspect-[4/5] w-full overflow-hidden">
+                  <div className="flex h-full flex-col justify-end p-10 text-brand-bone">
+                    <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/70">No. 01 / Of the season</p>
+                    <p className="mt-4 font-display text-3xl italic">{c.hero_featured_dish}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>
+
+        {/* MANIFESTO */}
         <section className="border-t border-brand-cocoa/10 bg-brand-shell">
           <div className="section-shell grid grid-cols-1 gap-16 py-32 lg:grid-cols-12">
-            <div className="lg:col-span-3"><p className="eyebrow">— I</p><p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">Manifesto</p></div>
+            <div className="lg:col-span-3">
+              <p className="eyebrow">— I</p>
+              <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">Manifesto</p>
+            </div>
             <div className="lg:col-span-8 lg:col-start-5">
               <p className="font-display text-3xl font-light leading-snug text-brand-cocoa sm:text-4xl">{c.manifesto_text}</p>
             </div>
           </div>
         </section>
+
+        {/* MENU */}
         <section id="menu" className="bg-brand-bone">
           <div className="section-shell py-32">
             <div className="grid grid-cols-1 gap-16 lg:grid-cols-12">
-              <div className="lg:col-span-3"><p className="eyebrow">— II</p><p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">The Menu</p></div>
+              <div className="lg:col-span-3">
+                <p className="eyebrow">— II</p>
+                <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">The Menu</p>
+              </div>
               <div className="lg:col-span-8 lg:col-start-5">
                 <h2 className="display text-5xl sm:text-6xl">{c.menu_headline}</h2>
                 <p className="mt-6 max-w-md font-display text-lg italic text-brand-cocoa/65">{c.menu_subtext}</p>
@@ -152,12 +258,20 @@ export const HomePage = () => {
               <div className="lg:col-span-12">
                 {signatureDishes.map((dish, i) => {
                   const key = dishKeyMap[dish];
+                  const slug = dishSlugMap[dish];
                   const story = key ? (c[key + '_story'] || 'Made with care.') : 'Made with care.';
                   const note = key ? (c[key + '_note'] || 'House favourite') : 'House favourite';
+                  const imgUrl = slug ? dishImgs[slug] : undefined;
                   return (
                     <article key={dish} className="dish">
+                      {imgUrl && (
+                        <img src={imgUrl} alt={dish} className="dish__img" style={{width:'56px',height:'56px',objectFit:'cover',borderRadius:'6px',flexShrink:0}} />
+                      )}
                       <span className="dish__no">{String(i + 1).padStart(2, '0')}</span>
-                      <div><h3 className="dish__name">{dish}</h3><p className="dish__desc">{story}</p></div>
+                      <div>
+                        <h3 className="dish__name">{dish}</h3>
+                        <p className="dish__desc">{story}</p>
+                      </div>
                       <span className="dish__origin hidden md:block">— {note}</span>
                     </article>
                   );
@@ -168,13 +282,17 @@ export const HomePage = () => {
               {menuGroups.map((group) => (
                 <div key={group.title}>
                   <p className="eyebrow">{group.title}</p>
-                  <ul className="mt-4 space-y-2 font-display text-lg text-brand-cocoa/80">{group.items.map((item) => (<li key={item}>{item}</li>))}</ul>
+                  <ul className="mt-4 space-y-2 font-display text-lg text-brand-cocoa/80">
+                    {group.items.map((item) => (<li key={item}>{item}</li>))}
+                  </ul>
                 </div>
               ))}
             </div>
             <p className="mt-16 max-w-lg font-display text-sm italic text-brand-cocoa/55">{c.menu_footer_note}</p>
           </div>
         </section>
+
+        {/* HERITAGE */}
         <section id="about" className="border-t border-brand-cocoa/10 bg-brand-cocoa text-brand-bone">
           <div className="section-shell grid grid-cols-1 gap-16 py-32 lg:grid-cols-12">
             <div className="lg:col-span-3">
@@ -188,10 +306,15 @@ export const HomePage = () => {
             </div>
           </div>
         </section>
+
+        {/* LOCATIONS */}
         <section id="locations" className="bg-brand-bone">
           <div className="section-shell py-32">
             <div className="grid grid-cols-1 gap-16 lg:grid-cols-12">
-              <div className="lg:col-span-3"><p className="eyebrow">— IV</p><p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">Two Tables</p></div>
+              <div className="lg:col-span-3">
+                <p className="eyebrow">— IV</p>
+                <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">Two Tables</p>
+              </div>
               <div className="lg:col-span-8 lg:col-start-5">
                 <h2 className="display text-5xl sm:text-6xl">{c.locations_headline}</h2>
                 <p className="mt-6 max-w-md font-display text-lg italic text-brand-cocoa/65">{c.locations_subtext}</p>
@@ -213,24 +336,61 @@ export const HomePage = () => {
             </div>
           </div>
         </section>
+
+        {/* GALLERY */}
         <section id="gallery" className="border-t border-brand-cocoa/10 bg-brand-shell">
           <div className="section-shell py-32">
             <div className="grid grid-cols-1 gap-16 lg:grid-cols-12">
-              <div className="lg:col-span-3"><p className="eyebrow">— V</p><p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">In the Kitchen</p></div>
+              <div className="lg:col-span-3">
+                <p className="eyebrow">— V</p>
+                <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">In the Kitchen</p>
+              </div>
               <div className="lg:col-span-8 lg:col-start-5">
                 <h2 className="display text-5xl sm:text-6xl">{c.gallery_headline}</h2>
                 <p className="mt-6 max-w-md font-display text-lg italic text-brand-cocoa/65">{c.gallery_subtext}</p>
               </div>
             </div>
             <div className="mt-20 grid grid-cols-12 gap-6">
-              <div className="canvas-img col-span-12 aspect-[3/2] md:col-span-7" />
-              <div className="canvas-img-dark col-span-12 aspect-[3/2] md:col-span-5" />
-              <div className="canvas-img-dark col-span-6 aspect-square md:col-span-4" />
-              <div className="canvas-img col-span-6 aspect-square md:col-span-4" />
-              <div className="canvas-img col-span-12 aspect-[3/2] md:col-span-4" />
+              {galleryImgs.length > 0 ? (
+                <>
+                  <div className="col-span-12 aspect-[3/2] md:col-span-7 overflow-hidden rounded-lg">
+                    <img src={galleryImgs[0]} alt="Gallery 1" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="col-span-12 aspect-[3/2] md:col-span-5 overflow-hidden rounded-lg">
+                    {galleryImgs[1]
+                      ? <img src={galleryImgs[1]} alt="Gallery 2" className="w-full h-full object-cover" />
+                      : <div className="canvas-img-dark w-full h-full" />}
+                  </div>
+                  <div className="col-span-6 aspect-square md:col-span-4 overflow-hidden rounded-lg">
+                    {galleryImgs[2]
+                      ? <img src={galleryImgs[2]} alt="Gallery 3" className="w-full h-full object-cover" />
+                      : <div className="canvas-img-dark w-full h-full" />}
+                  </div>
+                  <div className="col-span-6 aspect-square md:col-span-4 overflow-hidden rounded-lg">
+                    {galleryImgs[3]
+                      ? <img src={galleryImgs[3]} alt="Gallery 4" className="w-full h-full object-cover" />
+                      : <div className="canvas-img w-full h-full" />}
+                  </div>
+                  <div className="col-span-12 aspect-[3/2] md:col-span-4 overflow-hidden rounded-lg">
+                    {galleryImgs[4]
+                      ? <img src={galleryImgs[4]} alt="Gallery 5" className="w-full h-full object-cover" />
+                      : <div className="canvas-img w-full h-full" />}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="canvas-img col-span-12 aspect-[3/2] md:col-span-7" />
+                  <div className="canvas-img-dark col-span-12 aspect-[3/2] md:col-span-5" />
+                  <div className="canvas-img-dark col-span-6 aspect-square md:col-span-4" />
+                  <div className="canvas-img col-span-6 aspect-square md:col-span-4" />
+                  <div className="canvas-img col-span-12 aspect-[3/2] md:col-span-4" />
+                </>
+              )}
             </div>
           </div>
         </section>
+
+        {/* ORDERING */}
         <section id="ordering" className="border-t border-brand-cocoa/10 bg-brand-bone">
           <div className="section-shell py-32 text-center">
             <p className="eyebrow">— VI / The invitation</p>
@@ -243,6 +403,8 @@ export const HomePage = () => {
             </div>
           </div>
         </section>
+
+        {/* CONTACT */}
         <section id="contact" className="border-t border-brand-cocoa/10 bg-brand-shell">
           <div className="section-shell grid grid-cols-1 gap-20 py-32 lg:grid-cols-12">
             <div className="lg:col-span-5">
@@ -259,15 +421,32 @@ export const HomePage = () => {
               </div>
             </div>
             <form className="space-y-2 lg:col-span-6 lg:col-start-7">
-              <label className="block"><span className="font-mono text-[10px] uppercase tracking-widest2 text-brand-cocoa/50">Name</span><input className="form-input" type="text" name="name" placeholder="Your name" /></label>
-              <label className="block pt-4"><span className="font-mono text-[10px] uppercase tracking-widest2 text-brand-cocoa/50">Phone</span><input className="form-input" type="tel" name="phone" placeholder="+44" /></label>
-              <label className="block pt-4"><span className="font-mono text-[10px] uppercase tracking-widest2 text-brand-cocoa/50">Email</span><input className="form-input" type="email" name="email" placeholder="you@email.com" /></label>
-              <label className="block pt-4"><span className="font-mono text-[10px] uppercase tracking-widest2 text-brand-cocoa/50">Event date</span><input className="form-input" type="text" name="event-date" placeholder="When?" /></label>
-              <label className="block pt-4"><span className="font-mono text-[10px] uppercase tracking-widest2 text-brand-cocoa/50">Tell us more</span><textarea className="form-input min-h-32" name="message" placeholder="Number of guests, preferred dishes, anything else." /></label>
+              <label className="block">
+                <span className="font-mono text-[10px] uppercase tracking-widest2 text-brand-cocoa/50">Name</span>
+                <input className="form-input" type="text" name="name" placeholder="Your name" />
+              </label>
+              <label className="block pt-4">
+                <span className="font-mono text-[10px] uppercase tracking-widest2 text-brand-cocoa/50">Phone</span>
+                <input className="form-input" type="tel" name="phone" placeholder="+44" />
+              </label>
+              <label className="block pt-4">
+                <span className="font-mono text-[10px] uppercase tracking-widest2 text-brand-cocoa/50">Email</span>
+                <input className="form-input" type="email" name="email" placeholder="you@email.com" />
+              </label>
+              <label className="block pt-4">
+                <span className="font-mono text-[10px] uppercase tracking-widest2 text-brand-cocoa/50">Event date</span>
+                <input className="form-input" type="text" name="event-date" placeholder="When?" />
+              </label>
+              <label className="block pt-4">
+                <span className="font-mono text-[10px] uppercase tracking-widest2 text-brand-cocoa/50">Tell us more</span>
+                <textarea className="form-input min-h-32" name="message" placeholder="Number of guests, preferred dishes, anything else." />
+              </label>
               <button type="button" className="primary-btn mt-10 w-full justify-center">Send enquiry &rarr;</button>
             </form>
           </div>
         </section>
+
+        {/* FOOTER */}
         <footer className="bg-brand-cocoa text-brand-bone">
           <div className="section-shell grid grid-cols-1 gap-12 py-20 md:grid-cols-12">
             <div className="md:col-span-5">
@@ -276,20 +455,30 @@ export const HomePage = () => {
             </div>
             <div className="md:col-span-3">
               <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/50">Visit</p>
-              <ul className="mt-4 space-y-2 text-sm text-brand-bone/80">{locations.map((l) => (<li key={l.id}>{l.shortName}</li>))}</ul>
+              <ul className="mt-4 space-y-2 text-sm text-brand-bone/80">
+                {locations.map((l) => (<li key={l.id}>{l.shortName}</li>))}
+              </ul>
             </div>
             <div className="md:col-span-2">
               <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/50">Index</p>
-              <ul className="mt-4 space-y-2 font-mono text-[11px] uppercase tracking-widest2 text-brand-bone/80">{navItems.map((n) => (<li key={n.label}><a href={n.href} className="hover:text-brand-ochre">{n.label}</a></li>))}</ul>
+              <ul className="mt-4 space-y-2 font-mono text-[11px] uppercase tracking-widest2 text-brand-bone/80">
+                {navItems.map((n) => (<li key={n.label}><a href={n.href} className="hover:text-brand-ochre">{n.label}</a></li>))}
+              </ul>
             </div>
             <div className="md:col-span-2">
               <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/50">Follow</p>
-              <ul className="mt-4 space-y-2 font-mono text-[11px] uppercase tracking-widest2 text-brand-bone/80"><li><a href={c.instagram_url} className="hover:text-brand-ochre">Instagram</a></li></ul>
+              <ul className="mt-4 space-y-2 font-mono text-[11px] uppercase tracking-widest2 text-brand-bone/80">
+                <li><a href={c.instagram_url} className="hover:text-brand-ochre">Instagram</a></li>
+              </ul>
             </div>
           </div>
-          <div className="section-shell border-t border-brand-bone/10 py-8 font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/40">&copy; {new Date().getFullYear()} Agrobeso &middot; South London</div>
+          <div className="section-shell border-t border-brand-bone/10 py-8 font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/40">
+            &copy; {new Date().getFullYear()} Agrobeso &middot; South London
+          </div>
         </footer>
       </main>
+
+      {/* MOBILE NAV */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-brand-cocoa/10 bg-brand-bone/95 p-2 backdrop-blur md:hidden">
         <ul className="grid grid-cols-4 gap-2">
           <li><a href="#menu" className="sticky-nav-btn">Menu</a></li>
@@ -298,6 +487,7 @@ export const HomePage = () => {
           <li><a href="#ordering" className="sticky-nav-btn">Reserve</a></li>
         </ul>
       </nav>
+
       <script type="application/ld+json">{JSON.stringify(schema)}</script>
     </>
   );
