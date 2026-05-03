@@ -228,6 +228,7 @@ export default function Admin() {
   const [sectionOrder, setSectionOrder] = useState(["hero","manifesto","menu","heritage","locations","gallery","ordering","contact"]);
   const [dragIdx, setDragIdx] = useState(null);
   const [dragOverIdx, setDragOverIdx] = useState(null);
+  const [showShuffler, setShowShuffler] = useState(false);
 
   const loadContent = async () => {
     setLoadingContent(true);
@@ -850,164 +851,103 @@ export default function Admin() {
           )}
 
           {/* ═══ PREVIEW TAB ════════════════════════════════════════════════ */}
+
+          {/* ═══ PREVIEW TAB ═══════════════════════════════════════════════════════════════════ */}
           {tab === "preview" && (
             <div style={{ display:"flex", flexDirection:"column", height:"calc(100vh - 45px)", marginTop:"-1.75rem", marginLeft:"-1.75rem", marginRight:"-1.75rem" }}>
-              {/* Toolbar */}
-              <div style={{ display:"flex", alignItems:"center", gap:"0.6rem", padding:"0.65rem 1.1rem", background:"white", borderBottom:"1px solid #e0d8d0", flexShrink:0, flexWrap:"wrap" }}>
-                <span style={{ fontWeight:700, color:"#2d1f14", fontSize:"0.82rem" }}>Live Preview</span>
-                <div style={{ display:"flex", gap:"0.15rem", background:"#f0ebe5", borderRadius:"6px", padding:"2px" }}>
-                  {[["desktop","Desktop"],["tablet","Tablet"],["mobile","Mobile"]].map(([d,lbl]) => (
-                    <button key={d} onClick={() => setPreviewDevice(d)} style={{
-                      padding:"0.28rem 0.65rem", border:"none", borderRadius:"4px", cursor:"pointer",
-                      fontSize:"0.72rem", fontWeight:previewDevice===d?700:400,
-                      background:previewDevice===d?"white":"transparent",
-                      color:previewDevice===d?"#b04a2a":"#777",
-                      boxShadow:previewDevice===d?"0 1px 3px rgba(0,0,0,0.1)":"none"
-                    }}>{lbl}</button>
-                  ))}
+              <div style={{ display:"flex", alignItems:"center", gap:"0.5rem", padding:"0.6rem 1rem", background:"#1a1a1a", borderBottom:"1px solid #333", flexShrink:0, flexWrap:"wrap" }}>
+                <span style={{ fontWeight:700, color:"#fff", fontSize:"0.8rem", letterSpacing:"0.05em", marginRight:"0.5rem" }}>LIVE PREVIEW</span>
+                {(["desktop","tablet","mobile"] as const).map(d => (
+                  <button key={d} onClick={() => { setPreviewDevice(d as any); setPreviewKey((k:number) => k+1); }}
+                    style={{ padding:"0.3rem 0.75rem", borderRadius:"4px", border:"1px solid", cursor:"pointer", fontSize:"0.75rem", fontWeight:600,
+                      background: previewDevice===d ? "#c8622a" : "transparent",
+                      color: previewDevice===d ? "#fff" : "#ccc",
+                      borderColor: previewDevice===d ? "#c8622a" : "#555" }}>
+                    {d==="desktop" ? "Desktop" : d==="tablet" ? "Tablet 768px" : "Mobile 390px"}
+                  </button>
+                ))}
+                <div style={{ marginLeft:"auto", display:"flex", gap:"0.5rem", alignItems:"center" }}>
+                  <button onClick={() => setPreviewKey((k:number) => k+1)}
+                    style={{ padding:"0.3rem 0.85rem", borderRadius:"4px", background:"#2a2a2a", border:"1px solid #555", color:"#ddd", cursor:"pointer", fontSize:"0.75rem" }}>
+                    Refresh
+                  </button>
+                  <a href="https://agrobeso-website.vercel.app" target="_blank" rel="noreferrer"
+                    style={{ padding:"0.3rem 0.85rem", borderRadius:"4px", background:"#276749", border:"none", color:"#fff", cursor:"pointer", fontSize:"0.75rem", textDecoration:"none", fontWeight:600 }}>
+                    Open live site
+                  </a>
+                  <button onClick={() => setShowShuffler((s:boolean) => !s)}
+                    style={{ padding:"0.3rem 0.85rem", borderRadius:"4px", background: showShuffler ? "#c8622a" : "#2a2a2a", border:"1px solid #555", color:"#ddd", cursor:"pointer", fontSize:"0.75rem" }}>
+                    Layout
+                  </button>
                 </div>
-                <button onClick={() => setPreviewKey(k => k+1)} style={S.btnSecondary as React.CSSProperties}>↻ Refresh</button>
-                <a href="/" target="_blank" rel="noreferrer" style={{ padding:"0.45rem 0.85rem", background:"#27ae60", color:"white", textDecoration:"none", borderRadius:"6px", fontSize:"0.82rem", fontWeight:700 }}>↗ Open live site</a>
-                <span style={{ marginLeft:"auto", fontSize:"0.68rem", color:"#bbb" }}>Save changes in other tabs, then click Refresh to see them here</span>
               </div>
-
-              <div style={{ display:"flex", flex:1, overflow:"hidden", background:"#ddd8d0" }}>
-                {/* Layout Shuffler panel */}
-                <div style={{ width:"220px", flexShrink:0, background:"white", borderRight:"1px solid #e0d8d0", overflowY:"auto", display:"flex", flexDirection:"column" }}>
-                  <div style={{ padding:"0.75rem 0.9rem 0.45rem", borderBottom:"1px solid #f0ebe5" }}>
-                    <p style={{ margin:0, fontWeight:700, fontSize:"0.78rem", color:"#2d1f14" }}>Layout Shuffler</p>
-                    <p style={{ margin:"0.2rem 0 0", fontSize:"0.65rem", color:"#bbb" }}>Drag to reorder sections</p>
-                  </div>
-                  <div style={{ padding:"0.45rem 0.5rem" }}>
-                    {sectionOrder.map((secId, idx) => {
-                      const info = SECTION_LABELS[secId] || { icon:"", label:secId, anchor:"#top" };
-                      const isDragging = dragIdx === idx;
-                      const isOver = dragOverIdx === idx;
-                      return (
-                        <div key={secId} draggable
-                          onDragStart={() => handleDragStart(idx)}
-                          onDragOver={(e) => handleDragOver(e, idx)}
-                          onDrop={() => handleDrop(idx)}
-                          onDragEnd={handleDragEnd}
-                          style={{
-                            display:"flex", alignItems:"center", gap:"0.45rem",
-                            padding:"0.5rem 0.55rem", marginBottom:"0.25rem",
-                            background:isOver?"#fff3ee":isDragging?"#f5ede5":"#faf9f7",
-                            border:"1.5px solid", borderColor:isOver?"#b04a2a":isDragging?"#e0c0a8":"#ece7e0",
-                            borderRadius:"6px", cursor:"grab", userSelect:"none" as const, opacity:isDragging?0.45:1
-                          }}>
-                          <span style={{ fontSize:"0.7rem", color:"#ccc", fontFamily:"monospace" }}>&#9783;</span>
-                          <span style={{ fontSize:"0.85rem" }}>{info.icon}</span>
-                          <span style={{ fontSize:"0.75rem", fontWeight:600, color:"#2d1f14", flex:1 }}>{info.label}</span>
-                          <span style={{ fontSize:"0.6rem", color:"#ccc" }}>#{idx+1}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Navigate to section */}
-                  <div style={{ borderTop:"1px solid #f0ebe5", padding:"0.65rem 0.9rem" }}>
-                    <p style={{ margin:"0 0 0.4rem", fontWeight:700, fontSize:"0.72rem", color:"#2d1f14" }}>Jump to section</p>
-                    {sectionOrder.map(secId => {
-                      const info = SECTION_LABELS[secId] || { icon:"", label:secId, anchor:"#top" };
-                      return (
-                        <a key={secId} href={"/" + info.anchor} target="site-preview-frame"
-                          style={{ display:"block", padding:"0.25rem 0.3rem", fontSize:"0.7rem", color:"#666", textDecoration:"none", borderRadius:"4px" }}>
-                          {info.icon} {info.label}
-                        </a>
-                      );
-                    })}
-                  </div>
-
-                  {/* Quick style swatches */}
-                  <div style={{ borderTop:"1px solid #f0ebe5", padding:"0.65rem 0.9rem" }}>
-                    <p style={{ margin:"0 0 0.5rem", fontWeight:700, fontSize:"0.72rem", color:"#2d1f14" }}>Style swatches</p>
-                    <p style={{ margin:"0 0 0.3rem", fontSize:"0.64rem", color:"#aaa", textTransform:"uppercase" as const, letterSpacing:"0.05em" }}>Accent colour</p>
-                    <div style={{ display:"flex", gap:"0.3rem", flexWrap:"wrap" as const, marginBottom:"0.55rem" }}>
-                      {[["#b04a2a","Clay"],["#1a5276","Navy"],["#1e8449","Forest"],["#6c3483","Plum"],["#784212","Amber"],["#2c3e50","Slate"]].map(([col, nm]) => (
-                        <div key={col} title={nm} onClick={() => setDesign((p) => ({ ...p, color_clay: col }))}
-                          style={{ width:"20px", height:"20px", borderRadius:"50%", background:col, cursor:"pointer",
-                            border:(design.color_clay||"#b04a2a")===col?"2.5px solid #2d1f14":"2px solid transparent",
-                            boxShadow:"0 1px 3px rgba(0,0,0,0.18)" }} />
-                      ))}
-                    </div>
-                    <p style={{ margin:"0 0 0.3rem", fontSize:"0.64rem", color:"#aaa", textTransform:"uppercase" as const, letterSpacing:"0.05em" }}>Background</p>
-                    <div style={{ display:"flex", gap:"0.3rem", flexWrap:"wrap" as const, marginBottom:"0.55rem" }}>
-                      {[["#F4EFE6","Bone"],["#FFFFFF","White"],["#1a1a1a","Dark"],["#F0F4F0","Sage"],["#FFF8F0","Warm"]].map(([col, nm]) => (
-                        <div key={col} title={nm} onClick={() => setDesign((p) => ({ ...p, color_bone: col }))}
-                          style={{ width:"20px", height:"20px", borderRadius:"50%", background:col, cursor:"pointer",
-                            border:(design.color_bone||"#F4EFE6")===col?"2.5px solid #2d1f14":"2px solid #ccc",
-                            boxShadow:"0 1px 3px rgba(0,0,0,0.12)" }} />
-                      ))}
-                    </div>
-                    <p style={{ margin:"0 0 0.3rem", fontSize:"0.64rem", color:"#aaa", textTransform:"uppercase" as const, letterSpacing:"0.05em" }}>Layout width</p>
-                    <div style={{ display:"flex", gap:"0.25rem", marginBottom:"0.55rem" }}>
-                      {[["contained","Box"],["wide","Wide"],["full-bleed","Full"]].map(([opt, lbl]) => (
-                        <button key={opt} onClick={() => setDesign((p) => ({ ...p, layout_width: opt }))}
-                          style={{ flex:1, padding:"0.28rem 0.1rem", border:"1.5px solid",
-                            borderColor:(design.layout_width||"contained")===opt?"#b04a2a":"#e0d8d0",
-                            background:(design.layout_width||"contained")===opt?"#fff3ee":"white",
-                            color:(design.layout_width||"contained")===opt?"#b04a2a":"#888",
-                            borderRadius:"4px", cursor:"pointer", fontSize:"0.62rem", fontWeight:600 }}>{lbl}</button>
-                      ))}
-                    </div>
-                    <p style={{ margin:"0 0 0.3rem", fontSize:"0.64rem", color:"#aaa", textTransform:"uppercase" as const, letterSpacing:"0.05em" }}>Card style</p>
-                    <div style={{ display:"flex", gap:"0.25rem", marginBottom:"0.65rem", flexWrap:"wrap" as const }}>
-                      {["flat","bordered","shadowed","glass"].map(opt => (
-                        <button key={opt} onClick={() => setDesign((p) => ({ ...p, card_style: opt }))}
-                          style={{ padding:"0.25rem 0.4rem", border:"1.5px solid",
-                            borderColor:(design.card_style||"flat")===opt?"#b04a2a":"#e0d8d0",
-                            background:(design.card_style||"flat")===opt?"#fff3ee":"white",
-                            color:(design.card_style||"flat")===opt?"#b04a2a":"#888",
-                            borderRadius:"4px", cursor:"pointer", fontSize:"0.6rem", fontWeight:600 }}>{opt}</button>
-                      ))}
-                    </div>
-                    <button onClick={saveDesign} style={{ ...S.btnPrimary, width:"100%", fontSize:"0.72rem", padding:"0.42rem" } as React.CSSProperties}>
-                      {designSaved ? "✓ Applied!" : "Apply styles to site"}
+              <div style={{ display:"flex", flex:1, overflow:"hidden", background: previewDevice==="desktop" ? "#f0ede8" : "#1e1e1e" }}>
+                {showShuffler && (
+                  <div style={{ width:"200px", flexShrink:0, background:"#141414", borderRight:"1px solid #2a2a2a", overflowY:"auto", padding:"0.75rem" }}>
+                    <div style={{ color:"#aaa", fontSize:"0.65rem", fontWeight:700, marginBottom:"0.5rem", textTransform:"uppercase" }}>Section Order</div>
+                    <div style={{ fontSize:"0.63rem", color:"#666", marginBottom:"0.75rem" }}>Drag to reorder</div>
+                    {sectionOrder.map((sec:string, i:number) => (
+                      <div key={sec} draggable
+                        onDragStart={() => setDragIdx(i)}
+                        onDragOver={(e:any) => { e.preventDefault(); setDragOverIdx(i); }}
+                        onDrop={() => {
+                          if (dragIdx === null || dragIdx === i) return;
+                          const next = [...sectionOrder];
+                          const [item] = next.splice(dragIdx, 1);
+                          next.splice(i, 0, item);
+                          setSectionOrder(next);
+                          setDragIdx(null); setDragOverIdx(null);
+                        }}
+                        onDragEnd={() => { setDragIdx(null); setDragOverIdx(null); }}
+                        style={{ display:"flex", alignItems:"center", gap:"0.4rem", padding:"0.4rem 0.5rem", marginBottom:"0.3rem", borderRadius:"4px", cursor:"grab",
+                          background: dragOverIdx===i ? "#c8622a22" : "#252525",
+                          border: dragIdx===i ? "1px dashed #c8622a" : "1px solid #2a2a2a",
+                          color:"#ccc", fontSize:"0.7rem" }}>
+                        <span>{SECTION_LABELS[sec] || sec}</span>
+                        <span style={{ marginLeft:"auto", color:"#444", fontSize:"0.6rem" }}>#{i+1}</span>
+                      </div>
+                    ))}
+                    <button onClick={() => setSectionOrder(["hero","manifesto","menu","heritage","locations","gallery","reserve","contact"])}
+                      style={{ width:"100%", marginTop:"0.5rem", padding:"0.35rem", background:"transparent", border:"1px solid #333", borderRadius:"4px", color:"#777", cursor:"pointer", fontSize:"0.65rem" }}>
+                      Reset order
                     </button>
-                    <button onClick={() => { const def = ["hero","manifesto","menu","heritage","locations","gallery","ordering","contact"]; setSectionOrder(def); supabase.from("site_content").upsert({ id:"layout__section_order", value:JSON.stringify(def), updated_at:new Date().toISOString() },{ onConflict:"id" }); }} style={{ width:"100%", marginTop:"0.4rem", padding:"0.32rem", background:"#f5f0eb", border:"1px solid #e0d8d0", borderRadius:"5px", cursor:"pointer", fontSize:"0.68rem", color:"#999" }}>↺ Reset section order</button>
                   </div>
-                </div>
-
-                {/* Preview iframe */}
-                <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", padding:"0.75rem", overflowY:"auto", gap:"0" }}>
-                  <div style={{
-                    width:previewWidth, maxWidth:"100%",
-                    boxShadow:"0 8px 40px rgba(0,0,0,0.25)",
-                    borderRadius:previewDevice==="desktop"?"2px":"14px",
-                    overflow:"hidden",
-                    transition:"width 0.3s ease",
-                    background:"white",
-                  }}>
-                    {previewDevice !== "desktop" && (
-                      <div style={{ background:"#2d1f14", padding:"0.4rem 0", display:"flex", justifyContent:"center" }}>
-                        <div style={{ width:"60px", height:"5px", background:"rgba(255,255,255,0.2)", borderRadius:"3px" }} />
+                )}
+                <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", overflow:"auto" }}>
+                  {previewDevice === "desktop" && (
+                    <iframe key={previewKey} src="https://agrobeso-website.vercel.app"
+                      style={{ width:"100%", height:"100%", border:"none", display:"block", flexShrink:0 }}
+                      title="Desktop Preview" />
+                  )}
+                  {previewDevice === "tablet" && (
+                    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", padding:"1.25rem 0", minHeight:"100%", width:"100%" }}>
+                      <div style={{ fontSize:"0.68rem", color:"#888", marginBottom:"0.6rem", textAlign:"center" }}>
+                        iPad viewport: 768px wide, exact rendering
                       </div>
-                    )}
-                    <iframe
-                      id="site-preview-frame"
-                      key={previewKey}
-                      src="/"
-                      name="site-preview-frame"
-                      style={{ width:"100%", height:"calc(100vh - 135px)", minHeight:"500px", border:"none", display:"block" }}
-                      title="Website preview"
-                    />
-                    {previewDevice !== "desktop" && (
-                      <div style={{ background:"#2d1f14", padding:"0.6rem 0", display:"flex", justifyContent:"center", gap:"0.5rem" }}>
-                        <div style={{ width:"30px", height:"30px", borderRadius:"50%", border:"2px solid rgba(255,255,255,0.2)" }} />
+                      <div style={{ width:"768px", height:"calc(100vh - 135px)", overflow:"hidden", boxShadow:"0 12px 48px rgba(0,0,0,0.7)", borderRadius:"6px", flexShrink:0 }}>
+                        <iframe key={previewKey} src="https://agrobeso-website.vercel.app"
+                          style={{ width:"768px", height:"100%", border:"none", display:"block" }}
+                          title="Tablet Preview" />
                       </div>
-                    )}
-                  </div>
-                  <p style={{ marginTop:"0.6rem", fontSize:"0.65rem", color:"#aaa", textAlign:"center" as const }}>
-                    {previewDevice.charAt(0).toUpperCase()+previewDevice.slice(1)} preview · Content reflects last saved state · Use ↻ Refresh after saving changes
-                  </p>
+                    </div>
+                  )}
+                  {previewDevice === "mobile" && (
+                    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", padding:"1.25rem 0", minHeight:"100%", width:"100%" }}>
+                      <div style={{ fontSize:"0.68rem", color:"#888", marginBottom:"0.6rem", textAlign:"center" }}>
+                        iPhone viewport: 390px wide, exact rendering
+                      </div>
+                      <div style={{ width:"390px", height:"calc(100vh - 135px)", overflow:"hidden", boxShadow:"0 12px 48px rgba(0,0,0,0.7)", borderRadius:"6px", flexShrink:0 }}>
+                        <iframe key={previewKey} src="https://agrobeso-website.vercel.app"
+                          style={{ width:"390px", height:"100%", border:"none", display:"block" }}
+                          title="Mobile Preview" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           )}
-
-
-        </main>
+          </main>
       </div>
     </div>
   );
