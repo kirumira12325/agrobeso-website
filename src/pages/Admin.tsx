@@ -561,7 +561,7 @@ function LivePreviewPanel({ content, isOpen, onToggle, activeAnchor }: { content
                 src={`https://agrobeso-website.vercel.app/#${activeAnchor || "top"}`}
                 style={{ width: "100%", height: "100%", border: "none", display: "block" }}
                 title="Preview"
-                onLoad={(e) => { try { const d = (e.target as HTMLIFrameElement).contentDocument; const anchor = activeAnchor || "top"; if (d) { const el = d.getElementById(anchor); if (el) { setTimeout(() => el.scrollIntoView({ behavior: "auto", block: "start" }), 50); } } } catch {} }}
+                onLoad={(e) => { try { const w = (e.target as HTMLIFrameElement).contentWindow; const d = (e.target as HTMLIFrameElement).contentDocument; const anchor = activeAnchor || "top"; if (w && d) { const el = d.getElementById(anchor); const top = el ? el.offsetTop : 0; setTimeout(() => { try { w.scrollTo({ top, left: 0, behavior: "instant" as ScrollBehavior }); } catch { w.scrollTo(0, top); } }, 100); } } catch {} }}
               />
             ) : (
               <div style={{
@@ -577,7 +577,7 @@ function LivePreviewPanel({ content, isOpen, onToggle, activeAnchor }: { content
                   src={`https://agrobeso-website.vercel.app/#${activeAnchor || "top"}`}
                   style={{ width: previewWidth, height: "100%", border: "none", display: "block" }}
                   title="Preview"
-                  onLoad={(e) => { try { const d = (e.target as HTMLIFrameElement).contentDocument; const anchor = activeAnchor || "top"; if (d) { const el = d.getElementById(anchor); if (el) { setTimeout(() => el.scrollIntoView({ behavior: "auto", block: "start" }), 50); } } } catch {} }}
+                  onLoad={(e) => { try { const w = (e.target as HTMLIFrameElement).contentWindow; const d = (e.target as HTMLIFrameElement).contentDocument; const anchor = activeAnchor || "top"; if (w && d) { const el = d.getElementById(anchor); const top = el ? el.offsetTop : 0; setTimeout(() => { try { w.scrollTo({ top, left: 0, behavior: "instant" as ScrollBehavior }); } catch { w.scrollTo(0, top); } }, 100); } } catch {} }}
                 />
               </div>
             )}
