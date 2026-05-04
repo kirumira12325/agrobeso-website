@@ -573,8 +573,9 @@ function LivePreviewPanel({ content, isOpen, onToggle }: { content: Record<strin
 
 // ─── Main Admin component ─────────────────────────────────────────────────────
 export default function Admin() {
-  const [authed, setAuthed] = useState(false);
+  const [authed, setAuthed] = useState(() => sessionStorage.getItem('adminAuthed') === 'true');
   const [pw, setPw] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [tab, setTab] = useState("content");
   const [openSec, setOpenSec] = useState<Record<string,boolean>>({"Hero Section": true});
   const [content, setContent] = useState<Record<string,string>>({});
@@ -697,14 +698,14 @@ export default function Admin() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (pw === ADMIN_PASSWORD) setAuthed(true); else alert("Incorrect password");
+    if (pw === ADMIN_PASSWORD) { setAuthed(true); sessionStorage.setItem('adminAuthed', 'true'); } else alert("Incorrect password");
   };
 
   const saveField = async (fieldId: string) => {
     setSaving(fieldId);
     const { error } = await supabase.from("site_content").upsert({ id: fieldId, value: content[fieldId] || "", updated_at: new Date().toISOString() }, { onConflict: "id" });
     setSaving(null);
-    if (!error) { setSavedField(fieldId); setTimeout(() => setSavedField(null), 2500); }
+    if (!error) { setSavedField(fieldId); setPreviewKey((k: number) => k + 1); setTimeout(() => setSavedField(null), 2500); }
     else alert("Save failed: " + error.message);
   };
 
@@ -713,7 +714,7 @@ export default function Admin() {
     const upserts = CONTENT_FIELDS.flatMap(s => s.fields).filter(f => content[f.id] !== undefined).map(f => ({ id: f.id, value: content[f.id] || "", updated_at: new Date().toISOString() }));
     if (!upserts.length) { setGlobalSave("idle"); return; }
     const { error } = await supabase.from("site_content").upsert(upserts, { onConflict: "id" });
-    setGlobalSave(error ? "error" : "saved"); setTimeout(() => setGlobalSave("idle"), 3000);
+    setGlobalSave(error ? "error" : "saved"); if (!error) setPreviewKey((k: number) => k + 1); setTimeout(() => setGlobalSave("idle"), 3000);
   };
 
   const handleImgUpload = async () => {
@@ -888,7 +889,23 @@ export default function Admin() {
         <h1 style={{ fontSize: "1.75rem", fontWeight: 400, margin: "0 0 0.25rem", color: "#2d1f14" }}>Admin Dashboard</h1>
         <p style={{ color: "#aaa", marginBottom: "1.75rem", fontSize: "0.9rem" }}>Enter your password to continue.</p>
         <form onSubmit={handleLogin}>
-          <input type="password" placeholder="Admin password" value={pw} onChange={e => setPw(e.target.value)} style={{ ...S.input, marginBottom: "1rem" } as React.CSSProperties} autoFocus />
+          <div style={{ position: "relative", marginBottom: "1rem" }}>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Admin password"
+              value={pw}
+              onChange={e => setPw(e.target.value)}
+              style={{ ...S.input, marginBottom: 0, paddingRight: "2.5rem", width: "100%", boxSizing: "border-box" } as React.CSSProperties}
+              autoFocus
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(s => !s)}
+              style={{ position: "absolute", right: "0.5rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#888", fontSize: "0.85rem", padding: "0.2rem" }}
+            >
+              {showPassword ? "🙈" : "👁"}
+            </button>
+          </div>
           <button type="submit" style={{ ...S.btnPrimary, width: "100%" } as React.CSSProperties}>Sign in</button>
         </form>
       </div>
