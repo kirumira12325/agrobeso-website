@@ -505,7 +505,7 @@ function LivePreviewPanel({ content, isOpen, onToggle, activeAnchor }: { content
           if (doc.readyState !== "complete" && attempts < 20) { setTimeout(() => tryScroll(attempts+1), 100); return; }
           const el = doc.getElementById(anchor);
           const top = el ? el.offsetTop : 0;
-          win.scrollTo(0, top);
+          if (el) { el.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" }); } else { win.scrollTo(0, top); }
         } catch {}
       };
       tryScroll();
