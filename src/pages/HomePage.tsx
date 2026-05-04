@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, CSSProperties } from 'react';
 import { buildMapUrl, buildRestaurantSchema } from '@/lib/schema';
 import { signatureDishes, menuGroups } from '@/data/restaurant';
 import { agrobesoSupabase as supabase } from '../integrations/supabase/agrobeso-client';
@@ -12,6 +12,28 @@ const navItems = [
   { label: 'Gallery', href: '#gallery' },
   { label: 'Reserve', href: '#ordering' },
 ];
+
+// Typography helpers — read font/size overrides from content (admin-controlled)
+const FONT_MAP: Record<string, string> = {
+  display_serif: '"Playfair Display", Georgia, serif',
+  sans_modern: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+  mono: '"JetBrains Mono", ui-monospace, monospace',
+  italic_serif: '"Cormorant Garamond", Georgia, serif',
+};
+const SIZE_MAP: Record<string, string> = {
+  S: '0.75em',
+  M: '1em',
+  L: '1.25em',
+  XL: '1.5em',
+};
+function hStyle(c: Record<string, string>, baseId: string): CSSProperties {
+  const f = c[baseId + '_font'];
+  const s = c[baseId + '_size'];
+  const style: CSSProperties = {};
+  if (f && FONT_MAP[f]) style.fontFamily = FONT_MAP[f];
+  if (s && SIZE_MAP[s]) { style.fontSize = SIZE_MAP[s]; style.lineHeight = 1.1; }
+  return style;
+}
 
 const defaultContent: Record<string, string> = {
   hero_tagline: 'Est. South London · Ghanaian Kitchen',
@@ -195,7 +217,7 @@ export const HomePage = () => {
           <div className="section-shell grid min-h-[88vh] grid-cols-1 items-center gap-16 py-24 lg:grid-cols-12 lg:gap-8">
             <div className="lg:col-span-7 reveal">
               <p className="eyebrow mb-10">— {c.hero_tagline}</p>
-              <h1 className="display text-[clamp(56px,9vw,144px)]">
+              <h1 className="display text-[clamp(56px,9vw,144px)]" style={hStyle(c, 'hero_headline_line1')}>
                 {c.hero_headline_line1}<br />{c.hero_headline_line2}<br />
                 <em className="font-display italic text-brand-clay">{c.hero_headline_italic}</em>
               </h1>
@@ -250,7 +272,7 @@ export const HomePage = () => {
                 <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">The Menu</p>
               </div>
               <div className="lg:col-span-8 lg:col-start-5">
-                <h2 className="display text-5xl sm:text-6xl">{c.menu_headline}</h2>
+                <h2 className="display text-5xl sm:text-6xl" style={hStyle(c, 'menu_headline')}>{c.menu_headline}</h2>
                 <p className="mt-6 max-w-md font-display text-lg italic text-brand-cocoa/65">{c.menu_subtext}</p>
               </div>
             </div>
@@ -300,7 +322,7 @@ export const HomePage = () => {
               <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-bone/50">Heritage</p>
             </div>
             <div className="lg:col-span-8 lg:col-start-5">
-              <h2 className="font-display text-5xl font-light tracking-tightest sm:text-6xl">{c.heritage_headline}</h2>
+              <h2 className="font-display text-5xl font-light tracking-tightest sm:text-6xl" style={hStyle(c, 'heritage_headline')}>{c.heritage_headline}</h2>
               <p className="mt-10 max-w-2xl font-display text-xl italic text-brand-bone/75">{c.heritage_paragraph1}</p>
               <p className="mt-8 max-w-xl text-[15px] leading-relaxed text-brand-bone/60">{c.heritage_paragraph2}</p>
             </div>
@@ -316,7 +338,7 @@ export const HomePage = () => {
                 <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">Two Tables</p>
               </div>
               <div className="lg:col-span-8 lg:col-start-5">
-                <h2 className="display text-5xl sm:text-6xl">{c.locations_headline}</h2>
+                <h2 className="display text-5xl sm:text-6xl" style={hStyle(c, 'locations_headline')}>{c.locations_headline}</h2>
                 <p className="mt-6 max-w-md font-display text-lg italic text-brand-cocoa/65">{c.locations_subtext}</p>
               </div>
             </div>
@@ -346,7 +368,7 @@ export const HomePage = () => {
                 <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">In the Kitchen</p>
               </div>
               <div className="lg:col-span-8 lg:col-start-5">
-                <h2 className="display text-5xl sm:text-6xl">{c.gallery_headline}</h2>
+                <h2 className="display text-5xl sm:text-6xl" style={hStyle(c, 'gallery_headline')}>{c.gallery_headline}</h2>
                 <p className="mt-6 max-w-md font-display text-lg italic text-brand-cocoa/65">{c.gallery_subtext}</p>
               </div>
             </div>
@@ -394,7 +416,7 @@ export const HomePage = () => {
         <section id="ordering" className="border-t border-brand-cocoa/10 bg-brand-bone">
           <div className="section-shell py-32 text-center">
             <p className="eyebrow">— VI / The invitation</p>
-            <h2 className="display mt-8 text-5xl sm:text-7xl">{c.ordering_headline}</h2>
+            <h2 className="display mt-8 text-5xl sm:text-7xl" style={hStyle(c, 'ordering_headline')}>{c.ordering_headline}</h2>
             <p className="mx-auto mt-8 max-w-xl font-display text-xl italic text-brand-cocoa/70">{c.ordering_subtext}</p>
             <div className="mx-auto mt-16 flex max-w-2xl flex-wrap items-center justify-center gap-8 font-mono text-[11px] uppercase tracking-widest2">
               <a href={peckham.phoneHref} className="border-b border-brand-cocoa pb-1 text-brand-cocoa transition hover:text-brand-clay">Call Peckham &rarr;</a>
@@ -409,7 +431,7 @@ export const HomePage = () => {
           <div className="section-shell grid grid-cols-1 gap-20 py-32 lg:grid-cols-12">
             <div className="lg:col-span-5">
               <p className="eyebrow">— VII</p>
-              <h2 className="display mt-6 text-4xl sm:text-5xl">{c.contact_headline}</h2>
+              <h2 className="display mt-6 text-4xl sm:text-5xl" style={hStyle(c, 'contact_headline')}>{c.contact_headline}</h2>
               <p className="mt-6 max-w-sm font-display text-lg italic text-brand-cocoa/65">{c.contact_subtext}</p>
               <div className="mt-12 space-y-5 text-[15px] text-brand-cocoa/80">
                 {locations.map((location) => (
