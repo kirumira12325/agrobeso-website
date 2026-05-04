@@ -81,6 +81,21 @@ const CONTENT_FIELDS = [
   ]},
 ];
 
+
+// ─── Section name → website anchor ID map (for live preview jump-to-section) ──
+const SECTION_ANCHORS: Record<string, string> = {
+  "Hero Section": "top",
+  "Manifesto Section": "top",
+  "Menu Section": "menu",
+  "Heritage Section": "about",
+  "Locations Section": "locations",
+  "Peckham Branch": "locations",
+  "Thornton Heath Branch": "locations",
+  "Gallery Section": "gallery",
+  "Reserve / Ordering": "ordering",
+  "Contact Section": "contact",
+  "Footer": "contact",
+};
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const DESIGN_GROUPS: DesignGroup[] = [
   { group: "Brand Colours", tokens: [
@@ -471,7 +486,7 @@ function SectionPreviewModal({ template, onClose, onAdd }: { template: SectionTe
 }
 
 // ─── Live Preview Panel ───────────────────────────────────────────────────────
-function LivePreviewPanel({ content, isOpen, onToggle }: { content: Record<string,string>; isOpen: boolean; onToggle: () => void }) {
+function LivePreviewPanel({ content, isOpen, onToggle, activeAnchor }: { content: Record<string,string>; isOpen: boolean; onToggle: () => void; activeAnchor?: string }) {
   const [device, setDevice] = useState<"desktop"|"tablet"|"mobile">("desktop");
   const [previewKey, setPreviewKey] = useState(0);
   const previewWidth = device === "tablet" ? "768px" : device === "mobile" ? "375px" : "100%";
@@ -542,8 +557,8 @@ function LivePreviewPanel({ content, isOpen, onToggle }: { content: Record<strin
           <div style={{ flex: 1, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "flex-start", background: device === "desktop" ? "#1a1a1a" : "#111", padding: device === "desktop" ? "0" : "0.5rem 0" }}>
             {device === "desktop" ? (
               <iframe
-                key={previewKey}
-                src="https://agrobeso-website.vercel.app"
+                key={`${previewKey}-${activeAnchor || "top"}`}
+                src={`https://agrobeso-website.vercel.app/#${activeAnchor || "top"}`}
                 style={{ width: "100%", height: "100%", border: "none", display: "block" }}
                 title="Preview"
               />
@@ -557,8 +572,8 @@ function LivePreviewPanel({ content, isOpen, onToggle }: { content: Record<strin
                 flexShrink: 0,
               }}>
                 <iframe
-                  key={previewKey}
-                  src="https://agrobeso-website.vercel.app"
+                  key={`${previewKey}-${activeAnchor || "top"}`}
+                  src={`https://agrobeso-website.vercel.app/#${activeAnchor || "top"}`}
                   style={{ width: previewWidth, height: "100%", border: "none", display: "block" }}
                   title="Preview"
                 />
@@ -632,6 +647,7 @@ export default function Admin() {
 
   // ── Content preview panel ──
   const [previewPanelOpen, setPreviewPanelOpen] = useState(true);
+  const [activeSection, setActiveSection] = useState<string>("Hero Section");
 
   const loadContent = async () => {
     setLoadingContent(true);
@@ -1033,7 +1049,7 @@ export default function Admin() {
                     const isOpen = !!openSec[sec.section];
                     return (
                       <div key={sec.section} style={S.card}>
-                        <button onClick={() => setOpenSec(p => ({ ...p, [sec.section]: !p[sec.section] }))} style={S.accordionBtn as React.CSSProperties}>
+                        <button onClick={() => { setOpenSec(p => ({ ...p, [sec.section]: !p[sec.section] })); setActiveSection(sec.section); }} style={S.accordionBtn as React.CSSProperties}>
                           <span style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                             <span>{sec.icon}</span>
                             <span style={{ fontWeight: 700, color: "#2d1f14", fontSize: "0.9rem" }}>{sec.section}</span>
@@ -1528,6 +1544,7 @@ export default function Admin() {
               content={content}
               isOpen={previewPanelOpen}
               onToggle={() => setPreviewPanelOpen(o => !o)}
+              activeAnchor={SECTION_ANCHORS[activeSection]}
             />
           )}
         </div>
