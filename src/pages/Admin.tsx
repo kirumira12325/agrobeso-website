@@ -497,21 +497,36 @@ function LivePreviewPanel({ content, isOpen, onToggle, activeAnchor }: { content
     const anchor = activeAnchor || "top";
     const scrollIframe = (iframe: HTMLIFrameElement | null) => {
       if (!iframe) return;
-      const tryScroll = (attempts = 0) => {
+      const doScroll = () => {
         try {
           const win = iframe.contentWindow;
           const doc = iframe.contentDocument;
-          if (!win || !doc) { if (attempts < 20) setTimeout(() => tryScroll(attempts+1), 100); return; }
-          if (doc.readyState !== "complete" && attempts < 20) { setTimeout(() => tryScroll(attempts+1), 100); return; }
+          if (!win || !doc) return;
           const el = doc.getElementById(anchor);
-          const top = el ? el.offsetTop : 0;
-          if (el) { el.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" }); } else { win.scrollTo(0, top); }
+          if (el) {
+            el.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" });
+          } else {
+            win.scrollTo(0, 0);
+          }
         } catch {}
       };
-      tryScroll();
+      const onLoad = () => {
+        doScroll();
+        setTimeout(doScroll, 200);
+        setTimeout(doScroll, 600);
+        setTimeout(doScroll, 1200);
+      };
+      iframe.addEventListener("load", onLoad);
+      try {
+        if (iframe.contentDocument && iframe.contentDocument.readyState === "complete") {
+          onLoad();
+        }
+      } catch {}
+      return () => iframe.removeEventListener("load", onLoad);
     };
-    scrollIframe(desktopIframeRef.current);
-    scrollIframe(mobileIframeRef.current);
+    const c1 = scrollIframe(desktopIframeRef.current);
+    const c2 = scrollIframe(mobileIframeRef.current);
+    return () => { if (c1) c1(); if (c2) c2(); };
   }, [activeAnchor, previewKey, device]);
 
   const previewWidth = device === "tablet" ? "768px" : device === "mobile" ? "375px" : "100%";
