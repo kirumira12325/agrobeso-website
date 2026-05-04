@@ -1003,7 +1003,7 @@ export default function Admin() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f5f0eb", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100vh", maxHeight: "100vh", overflow: "hidden", background: "#f5f0eb", display: "flex", flexDirection: "column" }}>
       {/* Top bar */}
       <div style={{ background: "#2d1f14", color: "white", padding: "0.75rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 200 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
