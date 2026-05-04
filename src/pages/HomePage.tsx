@@ -21,10 +21,10 @@ const FONT_MAP: Record<string, string> = {
   italic_serif: '"Cormorant Garamond", Georgia, serif',
 };
 const SIZE_MAP: Record<string, string> = {
-  S: '0.75em',
-  M: '1em',
-  L: '1.25em',
-  XL: '1.5em',
+  S: 'clamp(24px, 4vw, 48px)',
+  M: 'clamp(36px, 6vw, 80px)',
+  L: 'clamp(56px, 9vw, 130px)',
+  XL: 'clamp(72px, 12vw, 180px)',
 };
 function hStyle(c: Record<string, string>, baseId: string): CSSProperties {
   const f = c[baseId + '_font'];
