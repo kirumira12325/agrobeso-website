@@ -808,6 +808,7 @@ export default function Admin() {
   const saveDish = async (dish: Dish) => {
     setSaving("dish_" + dish.key);
     const upserts = [
+      { id: "dish_" + dish.key + "_name", value: content["dish_" + dish.key + "_name"] || dish.name, updated_at: new Date().toISOString() },
       { id: "dish_" + dish.key + "_story", value: content["dish_" + dish.key + "_story"] || dish.story, updated_at: new Date().toISOString() },
       { id: "dish_" + dish.key + "_note", value: content["dish_" + dish.key + "_note"] || dish.note, updated_at: new Date().toISOString() },
       { id: "dish_" + dish.key + "_price", value: content["dish_" + dish.key + "_price"] || "", updated_at: new Date().toISOString() },
@@ -843,9 +844,17 @@ export default function Admin() {
   const deleteDish = async (dish: Dish) => {
     if (!confirm(`Remove "${dish.name}" from the menu? This cannot be undone.`)) return;
     const isDefault = DEFAULT_DISHES.some(d => d.key === dish.key);
-    if (isDefault) { alert("Default dishes cannot be deleted. You can edit their content instead."); return; }
-    await supabase.from("site_content").delete().eq("id", "custom_dish__" + dish.key);
+    if (!isDefault) {
+      await supabase.from("site_content").delete().eq("id", "custom_dish__" + dish.key);
+    }
+    const keysToDelete = ["_name","_story","_note","_price"].map(s => "dish_" + dish.key + s);
+    await Promise.all(keysToDelete.map(k => supabase.from("site_content").delete().eq("id", k)));
     setDishes(prev => prev.filter(d => d.key !== dish.key));
+    setContent(prev => {
+      const next = { ...prev };
+      keysToDelete.forEach(k => delete next[k]);
+      return next;
+    });
   };
 
   const filteredImages = filterCat === "all" ? images : images.filter(i => i.category === filterCat);
@@ -1164,11 +1173,19 @@ export default function Admin() {
                               {dishMsg[dish.key] && <p style={{ fontSize: "0.62rem", color: dishMsg[dish.key].includes("fail") ? "#c00" : "#1a7a3a", textAlign: "center", margin: "0.15rem 0 0" }}>{dishMsg[dish.key]}</p>}
                             </div>
                             <div style={{ flex: 1 }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.4rem" }}>
-                                <p style={{ fontFamily: "Georgia,serif", fontSize: "0.95rem", color: "#2d1f14", margin: 0, flex: 1 }}>
-                                  {String(i+1).padStart(2,"0")}. {dish.name}
-                                </p>
-                                {isCustom && <span style={{ fontSize: "0.6rem", background: "#b04a2a", color: "white", padding: "0.1rem 0.4rem", borderRadius: "10px", fontWeight: 700 }}>Custom</span>}
+                              <div style={{ marginBottom: "0.5rem" }}>
+                                <label style={S.fieldLabel as React.CSSProperties}>Dish Name</label>
+                                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginTop: "0.25rem" }}>
+                                  <span style={{ fontSize: "0.72rem", color: "#bbb", flexShrink: 0 }}>{String(i+1).padStart(2,"0")}.</span>
+                                  <input
+                                    type="text"
+                                    value={content["dish_" + dish.key + "_name"] !== undefined ? content["dish_" + dish.key + "_name"] : dish.name}
+                                    onChange={e => setContent(prev => ({ ...prev, ["dish_" + dish.key + "_name"]: e.target.value }))}
+                                    style={{ ...S.input, flex: 1, fontFamily: "Georgia,serif", fontWeight: 600, fontSize: "0.92rem" } as React.CSSProperties}
+                                    placeholder={dish.name}
+                                  />
+                                  {isCustom && <span style={{ fontSize: "0.6rem", background: "#b04a2a", color: "white", padding: "0.1rem 0.4rem", borderRadius: "10px", fontWeight: 700, flexShrink: 0 }}>Custom</span>}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -1195,9 +1212,7 @@ export default function Admin() {
                             </div>
                           </div>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "0.25rem", borderTop: "1px dashed #e8e0d8" }}>
-                            {isCustom ? (
-                              <button onClick={() => deleteDish(dish)} style={{ padding: "0.25rem 0.65rem", background: "#fee8e8", color: "#dc2626", border: "1px solid #fca5a5", borderRadius: "5px", cursor: "pointer", fontSize: "0.7rem", fontWeight: 600 }}>Remove</button>
-                            ) : <span />}
+                            <button onClick={() => deleteDish(dish)} style={{ padding: "0.25rem 0.65rem", background: "#fee8e8", color: "#dc2626", border: "1px solid #fca5a5", borderRadius: "5px", cursor: "pointer", fontSize: "0.7rem", fontWeight: 600 }}>Delete</button>
                             <button onClick={() => saveDish(dish)} disabled={saving !== null} style={{ ...S.btnPrimary, fontSize: "0.75rem", padding: "0.35rem 0.9rem", background: savedField === "dish_" + dish.key ? "#27ae60" : "#b04a2a" } as React.CSSProperties}>
                               {saving === "dish_" + dish.key ? "Saving…" : savedField === "dish_" + dish.key ? "✓ Saved" : "Save"}
                             </button>
