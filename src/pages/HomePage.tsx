@@ -229,7 +229,7 @@ export const HomePage = () => {
         </section>
 
         {/* MANIFESTO */}
-        <section className="border-t border-brand-cocoa/10 bg-brand-shell">
+        <section id="manifesto" className="border-t border-brand-cocoa/10 bg-brand-shell">
           <div className="section-shell grid grid-cols-1 gap-16 py-32 lg:grid-cols-12">
             <div className="lg:col-span-3">
               <p className="eyebrow">— I</p>
@@ -447,7 +447,7 @@ export const HomePage = () => {
         </section>
 
         {/* FOOTER */}
-        <footer className="bg-brand-cocoa text-brand-bone">
+        <footer id="footer" className="bg-brand-cocoa text-brand-bone">
           <div className="section-shell grid grid-cols-1 gap-12 py-20 md:grid-cols-12">
             <div className="md:col-span-5">
               <p className="font-display text-4xl font-light tracking-tightest">Agrobeso</p>
