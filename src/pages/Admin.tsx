@@ -285,17 +285,80 @@ function SaveBtn({ onClick, saving, saved }: { onClick: () => void; saving: bool
 }
 
 // ─── Field component ──────────────────────────────────────────────────────────
-function Field({ label, hint, multiline, value, onChange, onSave, saving, saved }: {
+// Typography option lists used by both admin UI and live preview
+const FONT_OPTIONS = [
+  { id: 'display_serif', label: 'Display Serif', css: '"Playfair Display", Georgia, serif' },
+  { id: 'sans_modern', label: 'Sans Modern', css: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif' },
+  { id: 'mono', label: 'Mono', css: '"JetBrains Mono", ui-monospace, monospace' },
+  { id: 'italic_serif', label: 'Italic Serif', css: '"Cormorant Garamond", Georgia, serif' },
+];
+const SIZE_OPTIONS = [
+  { id: 'S', label: 'S', em: '0.85em' },
+  { id: 'M', label: 'M', em: '1em' },
+  { id: 'L', label: 'L', em: '1.2em' },
+  { id: 'XL', label: 'XL', em: '1.5em' },
+];
+const HEADING_FIELD_IDS = new Set([
+  'hero_headline_line1', 'hero_headline_line2', 'hero_headline_italic',
+  'menu_headline', 'heritage_headline', 'locations_headline',
+  'gallery_headline', 'ordering_headline', 'contact_headline',
+]);
+
+function Field({ label, hint, multiline, value, onChange, onSave, saving, saved, fieldId, fontValue, sizeValue, onFontChange, onSizeChange }: {
   label: string; hint: string; multiline: boolean; value: string; onChange: (v: string) => void; onSave: () => void; saving: boolean; saved: boolean;
+  fieldId?: string; fontValue?: string; sizeValue?: string; onFontChange?: (v: string) => void; onSizeChange?: (v: string) => void;
 }) {
+  const isHeading = !!(fieldId && HEADING_FIELD_IDS.has(fieldId));
+  const selectedFont = FONT_OPTIONS.find(o => o.id === fontValue);
+  const selectedSize = SIZE_OPTIONS.find(o => o.id === sizeValue);
+  const previewStyle: React.CSSProperties = {
+    fontFamily: selectedFont ? selectedFont.css : undefined,
+    fontSize: selectedSize ? selectedSize.em : undefined,
+    lineHeight: 1.15,
+  };
   return (
     <div style={{ marginBottom: "1.1rem" }}>
-      <label style={S.fieldLabel as React.CSSProperties}>{label}</label>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.6rem", flexWrap: "wrap" }}>
+        <label style={{ ...(S.fieldLabel as React.CSSProperties), margin: 0 }}>{label}</label>
+        {isHeading && (
+          <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap" }}>
+            <select
+              value={fontValue || ""}
+              onChange={e => onFontChange && onFontChange(e.target.value)}
+              style={{ fontSize: "0.7rem", padding: "0.2rem 0.35rem", border: "1px solid #d8d2c8", borderRadius: 4, background: "#fff", color: "#2d1f14", fontFamily: selectedFont ? selectedFont.css : undefined }}
+              title="Font family"
+            >
+              <option value="" style={{ fontFamily: "system-ui" }}>Default font</option>
+              {FONT_OPTIONS.map(opt => (
+                <option key={opt.id} value={opt.id} style={{ fontFamily: opt.css }}>{opt.label}</option>
+              ))}
+            </select>
+            <div style={{ display: "flex", border: "1px solid #d8d2c8", borderRadius: 4, overflow: "hidden" }} title="Size">
+              {SIZE_OPTIONS.map(opt => {
+                const active = sizeValue === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => onSizeChange && onSizeChange(active ? "" : opt.id)}
+                    style={{ padding: "0.15rem 0.4rem", fontSize: "0.65rem", border: "none", background: active ? "#b04a2a" : "#fff", color: active ? "#fff" : "#2d1f14", cursor: "pointer", fontWeight: 600 }}
+                  >{opt.label}</button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
       {hint && <p style={{ margin: "0 0 0.3rem", fontSize: "0.72rem", color: "#ccc", fontStyle: "italic" }}>{hint}</p>}
       {multiline
         ? <textarea value={value} onChange={e => onChange(e.target.value)} rows={3} style={{ ...S.input, resize: "vertical" } as React.CSSProperties} />
         : <input type="text" value={value} onChange={e => onChange(e.target.value)} style={S.input as React.CSSProperties} />
       }
+      {isHeading && (fontValue || sizeValue) && (
+        <div style={{ marginTop: "0.4rem", padding: "0.5rem 0.7rem", background: "#fff", border: "1px dashed #d8d2c8", borderRadius: 4, color: "#2d1f14", ...previewStyle }}>
+          {value || <span style={{ color: "#bbb", fontStyle: "italic" }}>Preview will appear here</span>}
+        </div>
+      )}
       <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "0.3rem" }}>
         <SaveBtn onClick={onSave} saving={saving} saved={saved} />
       </div>
@@ -761,7 +824,15 @@ export default function Admin() {
 
   const saveField = async (fieldId: string) => {
     setSaving(fieldId);
-    const { error } = await supabase.from("site_content").upsert({ id: fieldId, value: content[fieldId] || "", updated_at: new Date().toISOString() }, { onConflict: "id" });
+    const stamp = new Date().toISOString();
+    const rows: any[] = [{ id: fieldId, value: content[fieldId] || '', updated_at: stamp }];
+    if (HEADING_FIELD_IDS.has(fieldId)) {
+      const fontKey = fieldId + '_font';
+      const sizeKey = fieldId + '_size';
+      rows.push({ id: fontKey, value: content[fontKey] || '', updated_at: stamp });
+      rows.push({ id: sizeKey, value: content[sizeKey] || '', updated_at: stamp });
+    }
+    const { error } = await supabase.from("site_content").upsert(rows, { onConflict: "id" });
     setSaving(null);
     if (!error) { setSavedField(fieldId); setPreviewKey((k: number) => k + 1); setTimeout(() => setSavedField(null), 2500); }
     else alert("Save failed: " + error.message);
@@ -1102,8 +1173,11 @@ export default function Admin() {
                         {isOpen && (
                           <div style={{ paddingTop: "0.5rem", borderTop: "1px solid #f0ebe5" }}>
                             {sec.fields.map(f => (
-                              <Field key={f.id} label={f.label} hint={f.hint || ""} multiline={f.multiline}
+                              <Field key={f.id} label={f.label} hint={f.hint || ""} multiline={f.multiline} fieldId={f.id}
                                 value={content[f.id] || ""} onChange={v => setContent(p => ({ ...p, [f.id]: v }))}
+                                fontValue={content[f.id + "_font"] || ""} sizeValue={content[f.id + "_size"] || ""}
+                                onFontChange={v => setContent(p => ({ ...p, [f.id + "_font"]: v }))}
+                                onSizeChange={v => setContent(p => ({ ...p, [f.id + "_size"]: v }))}
                                 onSave={() => saveField(f.id)} saving={saving === f.id} saved={savedField === f.id} />
                             ))}
                             <div style={{ marginTop: "1rem", paddingTop: "0.75rem", borderTop: "1px dashed #e8e0d8" }}>
