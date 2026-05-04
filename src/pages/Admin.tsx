@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { agrobesoSupabase as supabase, AGROBESO_STORAGE_URL } from "../integrations/supabase/agrobeso-client";
 
-const ADMIN_PASSWORD = "agrobeso2024";
+const ADMIN_PASSWORD = "Agrobeso2024";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type UploadedImage = { name: string; url: string; category: string };
