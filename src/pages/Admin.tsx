@@ -489,6 +489,31 @@ function SectionPreviewModal({ template, onClose, onAdd }: { template: SectionTe
 function LivePreviewPanel({ content, isOpen, onToggle, activeAnchor }: { content: Record<string,string>; isOpen: boolean; onToggle: () => void; activeAnchor?: string }) {
   const [device, setDevice] = useState<"desktop"|"tablet"|"mobile">("desktop");
   const [previewKey, setPreviewKey] = useState(0);
+  const desktopIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const mobileIframeRef = useRef<HTMLIFrameElement | null>(null);
+  
+  // Scroll iframe to active section anchor when it changes
+  useEffect(() => {
+    const anchor = activeAnchor || "top";
+    const scrollIframe = (iframe: HTMLIFrameElement | null) => {
+      if (!iframe) return;
+      const tryScroll = (attempts = 0) => {
+        try {
+          const win = iframe.contentWindow;
+          const doc = iframe.contentDocument;
+          if (!win || !doc) { if (attempts < 20) setTimeout(() => tryScroll(attempts+1), 100); return; }
+          if (doc.readyState !== "complete" && attempts < 20) { setTimeout(() => tryScroll(attempts+1), 100); return; }
+          const el = doc.getElementById(anchor);
+          const top = el ? el.offsetTop : 0;
+          win.scrollTo({ top, left: 0, behavior: "instant" as ScrollBehavior });
+        } catch {}
+      };
+      tryScroll();
+    };
+    scrollIframe(desktopIframeRef.current);
+    scrollIframe(mobileIframeRef.current);
+  }, [activeAnchor, previewKey, device]);
+
   const previewWidth = device === "tablet" ? "768px" : device === "mobile" ? "375px" : "100%";
 
   return (
@@ -557,11 +582,11 @@ function LivePreviewPanel({ content, isOpen, onToggle, activeAnchor }: { content
           <div style={{ flex: 1, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "flex-start", background: device === "desktop" ? "#1a1a1a" : "#111", padding: device === "desktop" ? "0" : "0.5rem 0" }}>
             {device === "desktop" ? (
               <iframe
+                ref={desktopIframeRef}
                 key={`${previewKey}-${activeAnchor || "top"}`}
                 src={`https://agrobeso-website.vercel.app/#${activeAnchor || "top"}`}
                 style={{ width: "100%", height: "100%", border: "none", display: "block" }}
                 title="Preview"
-                onLoad={(e) => { try { const w = (e.target as HTMLIFrameElement).contentWindow; const d = (e.target as HTMLIFrameElement).contentDocument; const anchor = activeAnchor || "top"; if (w && d) { const el = d.getElementById(anchor); const top = el ? el.offsetTop : 0; setTimeout(() => { try { w.scrollTo({ top, left: 0, behavior: "instant" as ScrollBehavior }); } catch { w.scrollTo(0, top); } }, 100); } } catch {} }}
               />
             ) : (
               <div style={{
@@ -573,11 +598,11 @@ function LivePreviewPanel({ content, isOpen, onToggle, activeAnchor }: { content
                 flexShrink: 0,
               }}>
                 <iframe
+                  ref={mobileIframeRef}
                   key={`${previewKey}-${activeAnchor || "top"}`}
                   src={`https://agrobeso-website.vercel.app/#${activeAnchor || "top"}`}
                   style={{ width: previewWidth, height: "100%", border: "none", display: "block" }}
                   title="Preview"
-                  onLoad={(e) => { try { const w = (e.target as HTMLIFrameElement).contentWindow; const d = (e.target as HTMLIFrameElement).contentDocument; const anchor = activeAnchor || "top"; if (w && d) { const el = d.getElementById(anchor); const top = el ? el.offsetTop : 0; setTimeout(() => { try { w.scrollTo({ top, left: 0, behavior: "instant" as ScrollBehavior }); } catch { w.scrollTo(0, top); } }, 100); } } catch {} }}
                 />
               </div>
             )}
