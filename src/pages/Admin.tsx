@@ -85,7 +85,7 @@ const CONTENT_FIELDS = [
 // ─── Section name → website anchor ID map (for live preview jump-to-section) ──
 const SECTION_ANCHORS: Record<string, string> = {
   "Hero Section": "top",
-  "Manifesto Section": "top",
+  "Manifesto Section": "manifesto",
   "Menu Section": "menu",
   "Heritage Section": "about",
   "Locations Section": "locations",
@@ -94,7 +94,7 @@ const SECTION_ANCHORS: Record<string, string> = {
   "Gallery Section": "gallery",
   "Reserve / Ordering": "ordering",
   "Contact Section": "contact",
-  "Footer": "contact",
+  "Footer": "footer",
 };
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const DESIGN_GROUPS: DesignGroup[] = [
