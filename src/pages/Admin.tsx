@@ -293,74 +293,89 @@ const FONT_OPTIONS = [
   { id: 'italic_serif', label: 'Italic Serif', css: '"Cormorant Garamond", Georgia, serif' },
 ];
 const SIZE_OPTIONS = [
-  { id: 'S', label: 'S', em: '0.85em' },
-  { id: 'M', label: 'M', em: '1em' },
-  { id: 'L', label: 'L', em: '1.2em' },
-  { id: 'XL', label: 'XL', em: '1.5em' },
+  { id: 'S', label: 'S', preview: '0.85em', live: 'clamp(24px, 4vw, 48px)' },
+  { id: 'M', label: 'M', preview: '1em',    live: 'clamp(36px, 6vw, 80px)' },
+  { id: 'L', label: 'L', preview: '1.2em',  live: 'clamp(56px, 9vw, 130px)' },
+  { id: 'XL', label: 'XL', preview: '1.5em', live: 'clamp(72px, 12vw, 180px)' },
 ];
-const HEADING_FIELD_IDS = new Set([
-  'hero_headline_line1', 'hero_headline_line2', 'hero_headline_italic',
-  'menu_headline', 'heritage_headline', 'locations_headline',
-  'gallery_headline', 'ordering_headline', 'contact_headline',
+const TYPOGRAPHY_EXCLUDED_FIELD_IDS = new Set<string>([
+  'peckham_phone_href', 'thorntonheath_phone_href', 'instagram_url',
 ]);
+const SECTION_KEY_MAP: Record<string, string> = {
+  'Hero Section': 'hero',
+  'Manifesto Section': 'manifesto',
+  'Menu Section': 'menu',
+  'Heritage Section': 'heritage',
+  'Locations Section': 'locations',
+  'Peckham Branch': 'peckham',
+  'Thornton Heath Branch': 'thorntonheath',
+  'Gallery Section': 'gallery',
+  'Reserve / Ordering': 'ordering',
+  'Contact Section': 'contact',
+  'Footer': 'footer',
+};
 
-function Field({ label, hint, multiline, value, onChange, onSave, saving, saved, fieldId, fontValue, sizeValue, onFontChange, onSizeChange }: {
-  label: string; hint: string; multiline: boolean; value: string; onChange: (v: string) => void; onSave: () => void; saving: boolean; saved: boolean;
-  fieldId?: string; fontValue?: string; sizeValue?: string; onFontChange?: (v: string) => void; onSizeChange?: (v: string) => void;
-}) {
-  const isHeading = !!(fieldId && HEADING_FIELD_IDS.has(fieldId));
-  const selectedFont = FONT_OPTIONS.find(o => o.id === fontValue);
-  const selectedSize = SIZE_OPTIONS.find(o => o.id === sizeValue);
-  const previewStyle: React.CSSProperties = {
-    fontFamily: selectedFont ? selectedFont.css : undefined,
-    fontSize: selectedSize ? selectedSize.em : undefined,
-    lineHeight: 1.15,
-  };
+function SectionTypographyBar({ sectionLabel, content, setContent, onSave, onReset, saving, saved }: any) {
+  const sectionKey = SECTION_KEY_MAP[sectionLabel];
+  if (!sectionKey) return null;
+  const fontKey = "section__" + sectionKey + "_font";
+  const sizeKey = "section__" + sectionKey + "_size";
+  const fontVal = content[fontKey] || "";
+  const sizeVal = content[sizeKey] || "";
   return (
-    <div style={{ marginBottom: "1.1rem" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.6rem", flexWrap: "wrap" }}>
-        <label style={{ ...(S.fieldLabel as React.CSSProperties), margin: 0 }}>{label}</label>
-        {isHeading && (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap" }}>
-            <select
-              value={fontValue || ""}
-              onChange={e => onFontChange && onFontChange(e.target.value)}
-              style={{ fontSize: "0.7rem", padding: "0.2rem 0.35rem", border: "1px solid #d8d2c8", borderRadius: 4, background: "#fff", color: "#2d1f14", fontFamily: selectedFont ? selectedFont.css : undefined }}
-              title="Font family"
-            >
-              <option value="" style={{ fontFamily: "system-ui" }}>Default font</option>
-              {FONT_OPTIONS.map(opt => (
-                <option key={opt.id} value={opt.id} style={{ fontFamily: opt.css }}>{opt.label}</option>
-              ))}
-            </select>
-            <div style={{ display: "flex", border: "1px solid #d8d2c8", borderRadius: 4, overflow: "hidden" }} title="Size">
-              {SIZE_OPTIONS.map(opt => {
-                const active = sizeValue === opt.id;
-                return (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => onSizeChange && onSizeChange(active ? "" : opt.id)}
-                    style={{ padding: "0.15rem 0.4rem", fontSize: "0.65rem", border: "none", background: active ? "#b04a2a" : "#fff", color: active ? "#fff" : "#2d1f14", cursor: "pointer", fontWeight: 600 }}
-                  >{opt.label}</button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", padding: "0.6rem 0.75rem", background: "#f7f3ed", border: "1px solid #e6dfd5", borderRadius: 4, marginBottom: "0.75rem" }}>
+      <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "#3d342a" }}>Section default:</span>
+      <select value={fontVal} onChange={e => setContent((p: any) => ({ ...p, [fontKey]: e.target.value }))} style={{ padding: "0.25rem 0.4rem", fontSize: "0.75rem", border: "1px solid #d6cdbf", borderRadius: 4, background: "white" }}>
+        <option value="">No default</option>
+        {FONT_OPTIONS.map((o: any) => <option key={o.id} value={o.id} style={{ fontFamily: o.css }}>{o.label}</option>)}
+      </select>
+      <div style={{ display: "flex", gap: "0.2rem" }}>
+        <button type="button" onClick={() => setContent((p: any) => ({ ...p, [sizeKey]: "" }))} style={{ padding: "0.2rem 0.45rem", fontSize: "0.7rem", border: "1px solid #d6cdbf", borderRadius: 4, background: !sizeVal ? "#3d342a" : "white", color: !sizeVal ? "white" : "#3d342a", cursor: "pointer" }}>—</button>
+        {SIZE_OPTIONS.map((s: any) => <button key={s.id} type="button" onClick={() => setContent((p: any) => ({ ...p, [sizeKey]: s.id }))} style={{ padding: "0.2rem 0.45rem", fontSize: "0.7rem", border: "1px solid #d6cdbf", borderRadius: 4, background: sizeVal === s.id ? "#3d342a" : "white", color: sizeVal === s.id ? "white" : "#3d342a", cursor: "pointer" }}>{s.label}</button>)}
       </div>
-      {hint && <p style={{ margin: "0 0 0.3rem", fontSize: "0.72rem", color: "#ccc", fontStyle: "italic" }}>{hint}</p>}
-      {multiline
-        ? <textarea value={value} onChange={e => onChange(e.target.value)} rows={3} style={{ ...S.input, resize: "vertical" } as React.CSSProperties} />
-        : <input type="text" value={value} onChange={e => onChange(e.target.value)} style={S.input as React.CSSProperties} />
-      }
-      {isHeading && (fontValue || sizeValue) && (
-        <div style={{ marginTop: "0.4rem", padding: "0.5rem 0.7rem", background: "#fff", border: "1px dashed #d8d2c8", borderRadius: 4, color: "#2d1f14", ...previewStyle }}>
-          {value || <span style={{ color: "#bbb", fontStyle: "italic" }}>Preview will appear here</span>}
+      <button onClick={onSave} disabled={saving === fontKey} style={{ padding: "0.3rem 0.7rem", fontSize: "0.75rem", border: "1px solid #3d342a", background: "#3d342a", color: "white", borderRadius: 4, cursor: "pointer" }}>{saving === fontKey ? "Saving..." : "Save section default"}</button>
+      {saved === fontKey && <span style={{ color: "#7a8a5b", fontSize: "0.75rem" }}>✓ Saved</span>}
+      <button onClick={onReset} disabled={!!saving} style={{ padding: "0.3rem 0.7rem", fontSize: "0.75rem", border: "1px solid #c9a36a", background: "white", color: "#3d342a", borderRadius: 4, cursor: "pointer", marginLeft: "auto" }}>Reset all fields</button>
+    </div>
+  );
+}
+
+function Field({ label, hint, multiline, value, onChange, onSave, saving, saved, fieldId, fontValue, sizeValue, onFontChange, onSizeChange, sectionFontValue, sectionSizeValue }: any) {
+  const isExcluded = TYPOGRAPHY_EXCLUDED_FIELD_IDS.has(fieldId);
+  const showControls = !isExcluded;
+  const inheritedFont = !fontValue && sectionFontValue ? sectionFontValue : "";
+  const inheritedSize = !sizeValue && sectionSizeValue ? sectionSizeValue : "";
+  const effectiveFont = fontValue || inheritedFont;
+  const effectiveSize = sizeValue || inheritedSize;
+  const fontCss = (FONT_OPTIONS.find((o: any) => o.id === effectiveFont) || {}).css;
+  const sizePreview = (SIZE_OPTIONS.find((o: any) => o.id === effectiveSize) || {}).preview;
+  return (
+    <div style={{ marginBottom: "1rem" }}>
+      <label style={{ display: "block", fontWeight: 600, marginBottom: "0.25rem", fontSize: "0.85rem", color: "#3d342a" }}>{label}</label>
+      {hint && <div style={{ fontSize: "0.75rem", color: "#8a7e6e", marginBottom: "0.4rem" }}>{hint}</div>}
+      {showControls && (
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "0.4rem", flexWrap: "wrap" }}>
+          <select value={fontValue} onChange={e => onFontChange(e.target.value)} style={{ padding: "0.25rem 0.4rem", fontSize: "0.75rem", border: "1px solid #e6dfd5", borderRadius: 4, background: !fontValue && inheritedFont ? "#f7f3ed" : "white", fontStyle: !fontValue && inheritedFont ? "italic" : "normal" }}>
+            <option value="">{inheritedFont ? "(Section default)" : "Default"}</option>
+            {FONT_OPTIONS.map((o: any) => <option key={o.id} value={o.id} style={{ fontFamily: o.css }}>{o.label}</option>)}
+          </select>
+          <div style={{ display: "flex", gap: "0.2rem" }}>
+            <button type="button" onClick={() => onSizeChange("")} style={{ padding: "0.2rem 0.45rem", fontSize: "0.7rem", border: "1px solid #e6dfd5", borderRadius: 4, background: !sizeValue ? "#3d342a" : "white", color: !sizeValue ? "white" : "#3d342a", cursor: "pointer", fontStyle: !sizeValue && inheritedSize ? "italic" : "normal" }}>{inheritedSize ? "sec" : "—"}</button>
+            {SIZE_OPTIONS.map((s: any) => <button key={s.id} type="button" onClick={() => onSizeChange(s.id)} style={{ padding: "0.2rem 0.45rem", fontSize: "0.7rem", border: "1px solid #e6dfd5", borderRadius: 4, background: sizeValue === s.id ? "#3d342a" : "white", color: sizeValue === s.id ? "white" : "#3d342a", cursor: "pointer" }}>{s.label}</button>)}
+          </div>
         </div>
       )}
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "0.3rem" }}>
-        <SaveBtn onClick={onSave} saving={saving} saved={saved} />
+      {multiline ? (
+        <textarea value={value} onChange={e => onChange(e.target.value)} rows={3} style={{ width: "100%", padding: "0.5rem", border: "1px solid #e6dfd5", borderRadius: 4, fontFamily: "inherit", fontSize: "0.9rem" }} />
+      ) : (
+        <input type="text" value={value} onChange={e => onChange(e.target.value)} style={{ width: "100%", padding: "0.5rem", border: "1px solid #e6dfd5", borderRadius: 4, fontFamily: "inherit", fontSize: "0.9rem" }} />
+      )}
+      {showControls && (effectiveFont || effectiveSize) && value && (
+        <div style={{ marginTop: "0.4rem", padding: "0.5rem 0.75rem", background: "#faf7f2", border: "1px dashed #d6cdbf", borderRadius: 4, fontFamily: fontCss || "inherit", fontSize: sizePreview || "1em", lineHeight: 1.2, color: "#3d342a" }}>{value}</div>
+      )}
+      <div style={{ marginTop: "0.4rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <button onClick={onSave} disabled={saving} style={{ padding: "0.3rem 0.7rem", fontSize: "0.8rem", border: "1px solid #3d342a", background: "#3d342a", color: "white", borderRadius: 4, cursor: saving ? "wait" : "pointer" }}>{saving ? "Saving..." : "Save"}</button>
+        {saved && <span style={{ color: "#7a8a5b", fontSize: "0.8rem" }}>✓ Saved</span>}
       </div>
     </div>
   );
@@ -826,7 +841,7 @@ export default function Admin() {
     setSaving(fieldId);
     const stamp = new Date().toISOString();
     const rows: any[] = [{ id: fieldId, value: content[fieldId] || '', updated_at: stamp }];
-    if (HEADING_FIELD_IDS.has(fieldId)) {
+    if (!TYPOGRAPHY_EXCLUDED_FIELD_IDS.has(fieldId)) {
       const fontKey = fieldId + '_font';
       const sizeKey = fieldId + '_size';
       rows.push({ id: fontKey, value: content[fontKey] || '', updated_at: stamp });
@@ -836,6 +851,40 @@ export default function Admin() {
     setSaving(null);
     if (!error) { setSavedField(fieldId); setPreviewKey((k: number) => k + 1); setTimeout(() => setSavedField(null), 2500); }
     else alert("Save failed: " + error.message);
+  };
+
+  const saveSectionTypography = async (sectionLabel: string) => {
+    const sectionKey = SECTION_KEY_MAP[sectionLabel];
+    if (!sectionKey) return;
+    const fontKey = "section__" + sectionKey + "_font";
+    const sizeKey = "section__" + sectionKey + "_size";
+    setSaving(fontKey);
+    try {
+      const stamp = new Date().toISOString();
+      await supabase.from("site_content").upsert([
+        { id: fontKey, value: content[fontKey] || "", updated_at: stamp },
+        { id: sizeKey, value: content[sizeKey] || "", updated_at: stamp },
+      ], { onConflict: "id" });
+      setSavedField(fontKey); setPreviewKey((k: number) => k + 1); setTimeout(() => setSavedField(null), 2500);
+    } finally { setSaving(null); }
+  };
+
+  const resetSectionTypography = async (sectionLabel: string, fieldIds: string[]) => {
+    if (!confirm("Reset typography for all fields in this section? This will clear per-field font/size overrides.")) return;
+    const sectionKey = SECTION_KEY_MAP[sectionLabel] || sectionLabel;
+    setSaving("reset_" + sectionKey);
+    try {
+      const stamp = new Date().toISOString();
+      const rows = fieldIds.flatMap(id => [
+        { id: id + "_font", value: "", updated_at: stamp },
+        { id: id + "_size", value: "", updated_at: stamp },
+      ]);
+      await supabase.from("site_content").upsert(rows, { onConflict: "id" });
+      const updates: Record<string, string> = {};
+      for (const id of fieldIds) { updates[id + "_font"] = ""; updates[id + "_size"] = ""; }
+      setContent((p: any) => ({ ...p, ...updates }));
+      setPreviewKey((k: number) => k + 1);
+    } finally { setSaving(null); }
   };
 
   const saveAll = async () => {
@@ -1172,13 +1221,14 @@ export default function Admin() {
                         </button>
                         {isOpen && (
                           <div style={{ paddingTop: "0.5rem", borderTop: "1px solid #f0ebe5" }}>
+                            <SectionTypographyBar sectionLabel={sec.section} content={content} setContent={setContent} saving={saving} saved={savedField} onSave={() => saveSectionTypography(sec.section)} onReset={() => resetSectionTypography(sec.section, sec.fields.filter((ff: any) => !TYPOGRAPHY_EXCLUDED_FIELD_IDS.has(ff.id)).map((ff: any) => ff.id))} />
                             {sec.fields.map(f => (
                               <Field key={f.id} label={f.label} hint={f.hint || ""} multiline={f.multiline} fieldId={f.id}
                                 value={content[f.id] || ""} onChange={v => setContent(p => ({ ...p, [f.id]: v }))}
                                 fontValue={content[f.id + "_font"] || ""} sizeValue={content[f.id + "_size"] || ""}
                                 onFontChange={v => setContent(p => ({ ...p, [f.id + "_font"]: v }))}
                                 onSizeChange={v => setContent(p => ({ ...p, [f.id + "_size"]: v }))}
-                                onSave={() => saveField(f.id)} saving={saving === f.id} saved={savedField === f.id} />
+                                onSave={() => saveField(f.id)} saving={saving === f.id} saved={savedField === f.id} sectionFontValue={content["section__" + (SECTION_KEY_MAP[sec.section] || "") + "_font"] || ""} sectionSizeValue={content["section__" + (SECTION_KEY_MAP[sec.section] || "") + "_size"] || ""} />
                             ))}
                             <div style={{ marginTop: "1rem", paddingTop: "0.75rem", borderTop: "1px dashed #e8e0d8" }}>
                               <p style={{ ...S.fieldLabel as any, marginBottom: "0.4rem" }}>Section Image</p>
