@@ -26,12 +26,30 @@ const SIZE_MAP: Record<string, string> = {
   L: 'clamp(56px, 9vw, 130px)',
   XL: 'clamp(72px, 12vw, 180px)',
 };
+const SECTION_KEY_FOR_FIELD: Record<string, string> = {
+  hero_tagline: "hero", hero_headline_line1: "hero", hero_headline_line2: "hero", hero_headline_italic: "hero", hero_subheadline: "hero", hero_featured_dish: "hero",
+  manifesto_text: "manifesto",
+  menu_headline: "menu", menu_subtext: "menu", menu_footer_note: "menu",
+  heritage_headline: "heritage", heritage_paragraph1: "heritage", heritage_paragraph2: "heritage",
+  locations_headline: "locations", locations_subtext: "locations",
+  peckham_address: "peckham", peckham_phone_label: "peckham", peckham_hours: "peckham",
+  thorntonheath_address: "thorntonheath", thorntonheath_phone_label: "thorntonheath", thorntonheath_hours: "thorntonheath",
+  gallery_headline: "gallery", gallery_subtext: "gallery",
+  ordering_headline: "ordering", ordering_subtext: "ordering",
+  contact_headline: "contact", contact_subtext: "contact",
+  footer_tagline: "footer",
+};
 function hStyle(c: Record<string, string>, baseId: string): CSSProperties {
-  const f = c[baseId + '_font'];
-  const s = c[baseId + '_size'];
+  const f = c[baseId + "_font"];
+  const s = c[baseId + "_size"];
+  const sectionKey = SECTION_KEY_FOR_FIELD[baseId];
+  const sf = sectionKey ? c["section__" + sectionKey + "_font"] : "";
+  const ss = sectionKey ? c["section__" + sectionKey + "_size"] : "";
+  const font = f || sf;
+  const size = s || ss;
   const style: CSSProperties = {};
-  if (f && FONT_MAP[f]) style.fontFamily = FONT_MAP[f];
-  if (s && SIZE_MAP[s]) { style.fontSize = SIZE_MAP[s]; style.lineHeight = 1.1; }
+  if (font && FONT_MAP[font]) style.fontFamily = FONT_MAP[font];
+  if (size && SIZE_MAP[size]) { style.fontSize = SIZE_MAP[size]; style.lineHeight = 1.1; }
   return style;
 }
 
@@ -181,6 +199,9 @@ export const HomePage = () => {
     phoneHref: c.peckham_phone_href,
     mapsQuery: c.peckham_address,
     openingHoursPlaceholder: c.peckham_hours,
+    addressFieldId: 'peckham_address',
+    phoneLabelFieldId: 'peckham_phone_label',
+    hoursFieldId: 'peckham_hours',
   };
 
   const thorntonHeath = {
@@ -191,6 +212,9 @@ export const HomePage = () => {
     phoneHref: c.thorntonheath_phone_href,
     mapsQuery: c.thorntonheath_address,
     openingHoursPlaceholder: c.thorntonheath_hours,
+    addressFieldId: 'thorntonheath_address',
+    phoneLabelFieldId: 'thorntonheath_phone_label',
+    hoursFieldId: 'thorntonheath_hours',
   };
 
   const locations = [peckham, thorntonHeath];
@@ -216,12 +240,12 @@ export const HomePage = () => {
         <section className="hero-pattern relative overflow-hidden">
           <div className="section-shell grid min-h-[88vh] grid-cols-1 items-center gap-16 py-24 lg:grid-cols-12 lg:gap-8">
             <div className="lg:col-span-7 reveal">
-              <p className="eyebrow mb-10">— {c.hero_tagline}</p>
+              <p className="eyebrow mb-10">— {<span style={hStyle(c, 'hero_tagline')}>{c.hero_tagline}</span>}</p>
               <h1 className="display text-[clamp(56px,9vw,144px)]" style={hStyle(c, 'hero_headline_line1')}>
-                {c.hero_headline_line1}<br />{c.hero_headline_line2}<br />
-                <em className="font-display italic text-brand-clay">{c.hero_headline_italic}</em>
+                {<span style={hStyle(c, 'hero_headline_line1')}>{c.hero_headline_line1}</span>}<br />{<span style={hStyle(c, 'hero_headline_line2')}>{c.hero_headline_line2}</span>}<br />
+                <em className="font-display italic text-brand-clay">{<span style={hStyle(c, 'hero_headline_italic')}>{c.hero_headline_italic}</span>}</em>
               </h1>
-              <p className="mt-12 max-w-md font-display text-xl italic text-brand-cocoa/70">{c.hero_subheadline}</p>
+              <p className="mt-12 max-w-md font-display text-xl italic text-brand-cocoa/70">{<span style={hStyle(c, 'hero_subheadline')}>{c.hero_subheadline}</span>}</p>
               <div className="mt-12 flex flex-wrap items-center gap-8">
                 <a href="#menu" className="font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa">
                   <span className="border-b border-brand-cocoa pb-1">View the menu</span>
@@ -235,14 +259,14 @@ export const HomePage = () => {
                   <img src={heroImg} alt="Agrobeso hero" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-10 text-brand-bone">
                     <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/70">No. 01 / Of the season</p>
-                    <p className="mt-4 font-display text-3xl italic">{c.hero_featured_dish}</p>
+                    <p className="mt-4 font-display text-3xl italic">{<span style={hStyle(c, 'hero_featured_dish')}>{c.hero_featured_dish}</span>}</p>
                   </div>
                 </div>
               ) : (
                 <div className="canvas-img-dark aspect-[4/5] w-full overflow-hidden">
                   <div className="flex h-full flex-col justify-end p-10 text-brand-bone">
                     <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/70">No. 01 / Of the season</p>
-                    <p className="mt-4 font-display text-3xl italic">{c.hero_featured_dish}</p>
+                    <p className="mt-4 font-display text-3xl italic">{<span style={hStyle(c, 'hero_featured_dish')}>{c.hero_featured_dish}</span>}</p>
                   </div>
                 </div>
               )}
@@ -258,7 +282,7 @@ export const HomePage = () => {
               <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">Manifesto</p>
             </div>
             <div className="lg:col-span-8 lg:col-start-5">
-              <p className="font-display text-3xl font-light leading-snug text-brand-cocoa sm:text-4xl">{c.manifesto_text}</p>
+              <p className="font-display text-3xl font-light leading-snug text-brand-cocoa sm:text-4xl">{<span style={hStyle(c, 'manifesto_text')}>{c.manifesto_text}</span>}</p>
             </div>
           </div>
         </section>
@@ -272,8 +296,8 @@ export const HomePage = () => {
                 <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">The Menu</p>
               </div>
               <div className="lg:col-span-8 lg:col-start-5">
-                <h2 className="display text-5xl sm:text-6xl" style={hStyle(c, 'menu_headline')}>{c.menu_headline}</h2>
-                <p className="mt-6 max-w-md font-display text-lg italic text-brand-cocoa/65">{c.menu_subtext}</p>
+                <h2 className="display text-5xl sm:text-6xl" style={hStyle(c, 'menu_headline')}>{<span style={hStyle(c, 'menu_headline')}>{c.menu_headline}</span>}</h2>
+                <p className="mt-6 max-w-md font-display text-lg italic text-brand-cocoa/65">{<span style={hStyle(c, 'menu_subtext')}>{c.menu_subtext}</span>}</p>
               </div>
             </div>
             <div className="mt-24 grid grid-cols-1 gap-x-16 lg:grid-cols-12">
@@ -310,7 +334,7 @@ export const HomePage = () => {
                 </div>
               ))}
             </div>
-            <p className="mt-16 max-w-lg font-display text-sm italic text-brand-cocoa/55">{c.menu_footer_note}</p>
+            <p className="mt-16 max-w-lg font-display text-sm italic text-brand-cocoa/55">{<span style={hStyle(c, 'menu_footer_note')}>{c.menu_footer_note}</span>}</p>
           </div>
         </section>
 
@@ -322,9 +346,9 @@ export const HomePage = () => {
               <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-bone/50">Heritage</p>
             </div>
             <div className="lg:col-span-8 lg:col-start-5">
-              <h2 className="font-display text-5xl font-light tracking-tightest sm:text-6xl" style={hStyle(c, 'heritage_headline')}>{c.heritage_headline}</h2>
-              <p className="mt-10 max-w-2xl font-display text-xl italic text-brand-bone/75">{c.heritage_paragraph1}</p>
-              <p className="mt-8 max-w-xl text-[15px] leading-relaxed text-brand-bone/60">{c.heritage_paragraph2}</p>
+              <h2 className="font-display text-5xl font-light tracking-tightest sm:text-6xl" style={hStyle(c, 'heritage_headline')}>{<span style={hStyle(c, 'heritage_headline')}>{c.heritage_headline}</span>}</h2>
+              <p className="mt-10 max-w-2xl font-display text-xl italic text-brand-bone/75">{<span style={hStyle(c, 'heritage_paragraph1')}>{c.heritage_paragraph1}</span>}</p>
+              <p className="mt-8 max-w-xl text-[15px] leading-relaxed text-brand-bone/60">{<span style={hStyle(c, 'heritage_paragraph2')}>{c.heritage_paragraph2}</span>}</p>
             </div>
           </div>
         </section>
@@ -338,8 +362,8 @@ export const HomePage = () => {
                 <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">Two Tables</p>
               </div>
               <div className="lg:col-span-8 lg:col-start-5">
-                <h2 className="display text-5xl sm:text-6xl" style={hStyle(c, 'locations_headline')}>{c.locations_headline}</h2>
-                <p className="mt-6 max-w-md font-display text-lg italic text-brand-cocoa/65">{c.locations_subtext}</p>
+                <h2 className="display text-5xl sm:text-6xl" style={hStyle(c, 'locations_headline')}>{<span style={hStyle(c, 'locations_headline')}>{c.locations_headline}</span>}</h2>
+                <p className="mt-6 max-w-md font-display text-lg italic text-brand-cocoa/65">{<span style={hStyle(c, 'locations_subtext')}>{c.locations_subtext}</span>}</p>
               </div>
             </div>
             <div className="mt-20 grid grid-cols-1 gap-px bg-brand-cocoa/15 md:grid-cols-2">
@@ -347,8 +371,8 @@ export const HomePage = () => {
                 <article key={location.id} className="bg-brand-bone p-10 sm:p-14">
                   <p className="font-mono text-[11px] uppercase tracking-widest2 text-brand-clay">{String(i + 1).padStart(2, '0')} / {location.shortName}</p>
                   <h3 className="mt-6 font-display text-4xl font-light tracking-tightest text-brand-cocoa sm:text-5xl">{location.shortName}</h3>
-                  <p className="mt-6 max-w-sm text-[15px] leading-relaxed text-brand-cocoa/70">{location.address}</p>
-                  <p className="mt-4 font-display text-sm italic text-brand-cocoa/50">{location.openingHoursPlaceholder}</p>
+                  <p className="mt-6 max-w-sm text-[15px] leading-relaxed text-brand-cocoa/70"><span style={hStyle(c, location.addressFieldId)}>{location.address}</span></p>
+                  <p className="mt-4 font-display text-sm italic text-brand-cocoa/50"><span style={hStyle(c, location.hoursFieldId)}>{location.openingHoursPlaceholder}</span></p>
                   <div className="mt-10 flex flex-wrap gap-6 font-mono text-[11px] uppercase tracking-widest2">
                     <a href={buildMapUrl(location.mapsQuery)} target="_blank" rel="noreferrer" className="border-b border-brand-cocoa pb-1 text-brand-cocoa transition hover:text-brand-clay">Directions &rarr;</a>
                     <a href={location.phoneHref} className="border-b border-brand-cocoa/30 pb-1 text-brand-cocoa/70 transition hover:border-brand-cocoa hover:text-brand-cocoa">Call</a>
@@ -368,8 +392,8 @@ export const HomePage = () => {
                 <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">In the Kitchen</p>
               </div>
               <div className="lg:col-span-8 lg:col-start-5">
-                <h2 className="display text-5xl sm:text-6xl" style={hStyle(c, 'gallery_headline')}>{c.gallery_headline}</h2>
-                <p className="mt-6 max-w-md font-display text-lg italic text-brand-cocoa/65">{c.gallery_subtext}</p>
+                <h2 className="display text-5xl sm:text-6xl" style={hStyle(c, 'gallery_headline')}>{<span style={hStyle(c, 'gallery_headline')}>{c.gallery_headline}</span>}</h2>
+                <p className="mt-6 max-w-md font-display text-lg italic text-brand-cocoa/65">{<span style={hStyle(c, 'gallery_subtext')}>{c.gallery_subtext}</span>}</p>
               </div>
             </div>
             <div className="mt-20 grid grid-cols-12 gap-6">
@@ -416,8 +440,8 @@ export const HomePage = () => {
         <section id="ordering" className="border-t border-brand-cocoa/10 bg-brand-bone">
           <div className="section-shell py-32 text-center">
             <p className="eyebrow">— VI / The invitation</p>
-            <h2 className="display mt-8 text-5xl sm:text-7xl" style={hStyle(c, 'ordering_headline')}>{c.ordering_headline}</h2>
-            <p className="mx-auto mt-8 max-w-xl font-display text-xl italic text-brand-cocoa/70">{c.ordering_subtext}</p>
+            <h2 className="display mt-8 text-5xl sm:text-7xl" style={hStyle(c, 'ordering_headline')}>{<span style={hStyle(c, 'ordering_headline')}>{c.ordering_headline}</span>}</h2>
+            <p className="mx-auto mt-8 max-w-xl font-display text-xl italic text-brand-cocoa/70">{<span style={hStyle(c, 'ordering_subtext')}>{c.ordering_subtext}</span>}</p>
             <div className="mx-auto mt-16 flex max-w-2xl flex-wrap items-center justify-center gap-8 font-mono text-[11px] uppercase tracking-widest2">
               <a href={peckham.phoneHref} className="border-b border-brand-cocoa pb-1 text-brand-cocoa transition hover:text-brand-clay">Call Peckham &rarr;</a>
               <a href={thorntonHeath.phoneHref} className="border-b border-brand-cocoa pb-1 text-brand-cocoa transition hover:text-brand-clay">Call Thornton Heath &rarr;</a>
@@ -431,13 +455,13 @@ export const HomePage = () => {
           <div className="section-shell grid grid-cols-1 gap-20 py-32 lg:grid-cols-12">
             <div className="lg:col-span-5">
               <p className="eyebrow">— VII</p>
-              <h2 className="display mt-6 text-4xl sm:text-5xl" style={hStyle(c, 'contact_headline')}>{c.contact_headline}</h2>
-              <p className="mt-6 max-w-sm font-display text-lg italic text-brand-cocoa/65">{c.contact_subtext}</p>
+              <h2 className="display mt-6 text-4xl sm:text-5xl" style={hStyle(c, 'contact_headline')}>{<span style={hStyle(c, 'contact_headline')}>{c.contact_headline}</span>}</h2>
+              <p className="mt-6 max-w-sm font-display text-lg italic text-brand-cocoa/65">{<span style={hStyle(c, 'contact_subtext')}>{c.contact_subtext}</span>}</p>
               <div className="mt-12 space-y-5 text-[15px] text-brand-cocoa/80">
                 {locations.map((location) => (
                   <div key={location.id}>
                     <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-cocoa/50">{location.shortName}</p>
-                    <a href={location.phoneHref} className="mt-1 block font-display text-2xl text-brand-cocoa transition hover:text-brand-clay">{location.phoneLabel}</a>
+                    <a href={location.phoneHref} className="mt-1 block font-display text-2xl text-brand-cocoa transition hover:text-brand-clay"><span style={hStyle(c, location.phoneLabelFieldId)}>{location.phoneLabel}</span></a>
                   </div>
                 ))}
               </div>
@@ -473,7 +497,7 @@ export const HomePage = () => {
           <div className="section-shell grid grid-cols-1 gap-12 py-20 md:grid-cols-12">
             <div className="md:col-span-5">
               <p className="font-display text-4xl font-light tracking-tightest">Agrobeso</p>
-              <p className="mt-4 max-w-xs font-display text-sm italic text-brand-bone/60">{c.footer_tagline}</p>
+              <p className="mt-4 max-w-xs font-display text-sm italic text-brand-bone/60">{<span style={hStyle(c, 'footer_tagline')}>{c.footer_tagline}</span>}</p>
             </div>
             <div className="md:col-span-3">
               <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/50">Visit</p>
