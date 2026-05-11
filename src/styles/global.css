@@ -7,7 +7,7 @@
 :root {
     font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     color: #2A1810;
-    background-color: #F4EFE6;
+    background-color: #F4EFE6
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -92,7 +92,7 @@ body {
     grid-template-columns: 1fr;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 1024) {
     .dish {
         @apply gap-8 py-10;
         grid-template-columns: 160px 1fr auto;
@@ -112,10 +112,16 @@ body {
     border-radius: 8px;
     cursor: pointer;
     display: block;
+        order: 2;
     transition: width 0.3s ease, height 0.3s ease;
 }
 
-@media (min-width: 640px) {
+    /* Text above image on mobile/tablet */
+    .dish > div {
+            order: 1;
+    }
+
+@media (min-width: 1024) {
     .dish__img {
         width: 160px;
         height: 160px;
@@ -132,7 +138,7 @@ body {
     display: none;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 1024) {
     .dish__img-placeholder {
         display: block;
         width: 160px;
