@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { buildMapUrl, buildRestaurantSchema } from '@/lib/schema';
 import { heroContent, locations, menuGroups, signatureDishes } from '@/data/restaurant';
+import { supabase, STORAGE_URL } from '@/lib/supabase';
 
 const navItems = [
   { label: 'Menu', href: '#menu' },
@@ -30,7 +32,7 @@ const dishStories: Record<string, { story: string; note: string }> = {
     note: 'Eaten with the right hand'
   },
   'Peanut Soup': {
-    story: 'Groundnut paste, tomato, ginger and slow-cooked goat \u2014 the cold-evening cure.',
+    story: 'Groundnut paste, tomato, ginger and slow-cooked goat — the cold-evening cure.',
     note: 'Nkate nkwan'
   },
   'Fufu / Pounded Yam': {
@@ -47,8 +49,49 @@ const dishStories: Record<string, { story: string; note: string }> = {
   }
 };
 
+const dishSlugMap: Record<string, string> = {
+  'Jollof Rice': 'jollof_rice',
+  'Waakye': 'waakye',
+  'Kenkey & Fish': 'kenkey_fish',
+  'Banku & Okra Stew': 'banku_okra',
+  'Peanut Soup': 'peanut_soup',
+  'Fufu / Pounded Yam': 'fufu',
+  'Fried Fish / Tilapia': 'fried_fish',
+  'Tuo Zaafi': 'tuo_zaafi',
+};
+
 export const HomePage = () => {
   const schema = buildRestaurantSchema();
+  const [dishImgs, setDishImgs] = useState<Record<string, string>>({});
+  const [galleryImgs, setGalleryImgs] = useState<string[]>([]);
+  const [heroImg, setHeroImg] = useState<string>('');
+
+  useEffect(() => {
+    supabase.storage.from('images').list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
+      .then(({ data }) => {
+        if (!data) return;
+        const dishMap: Record<string, string> = {};
+        const galleryFiles: string[] = [];
+        let hero = '';
+
+        data.forEach((f: any) => {
+          if (!f.name || f.name === '.emptyFolderPlaceholder') return;
+          const url = STORAGE_URL + '/' + f.name;
+          if (f.name.startsWith('hero-')) {
+            if (!hero) hero = url;
+          } else if (f.name.startsWith('gallery-')) {
+            galleryFiles.push(url);
+          } else if (f.name.startsWith('dish-')) {
+            const slug = f.name.replace(/^dish-/, '').replace(/-\d+\.\w+$/, '');
+            dishMap[slug] = url;
+          }
+        });
+
+        setDishImgs(dishMap);
+        setGalleryImgs(galleryFiles);
+        if (hero) setHeroImg(hero);
+      });
+  }, []);
 
   return (
     <>
@@ -74,7 +117,7 @@ export const HomePage = () => {
         <section className="hero-pattern relative overflow-hidden">
           <div className="section-shell grid min-h-[88vh] grid-cols-1 items-center gap-16 py-24 lg:grid-cols-12 lg:gap-8">
             <div className="lg:col-span-7 reveal">
-              <p className="eyebrow mb-10">— Est. South London &middot; Ghanaian Kitchen</p>
+              <p className="eyebrow mb-10">&mdash; Est. South London &middot; Ghanaian Kitchen</p>
               <h1 className="display text-[clamp(56px,9vw,144px)]">
                 The taste<br />
                 of home,<br />
@@ -94,12 +137,22 @@ export const HomePage = () => {
             </div>
 
             <div className="lg:col-span-5">
-              <div className="canvas-img-dark aspect-[4/5] w-full overflow-hidden">
-                <div className="flex h-full flex-col justify-end p-10 text-brand-bone">
-                  <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/70">No. 01 / Of the season</p>
-                  <p className="mt-4 font-display text-3xl italic">Jollof, the way grandmothers taught.</p>
+              {heroImg ? (
+                <div className="aspect-[4/5] w-full overflow-hidden relative">
+                  <img src={heroImg} alt="Agrobeso featured dish" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-10 text-brand-bone">
+                    <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/70">No. 01 / Of the season</p>
+                    <p className="mt-4 font-display text-3xl italic">Jollof, the way grandmothers taught.</p>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="canvas-img-dark aspect-[4/5] w-full overflow-hidden">
+                  <div className="flex h-full flex-col justify-end p-10 text-brand-bone">
+                    <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/70">No. 01 / Of the season</p>
+                    <p className="mt-4 font-display text-3xl italic">Jollof, the way grandmothers taught.</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -107,12 +160,12 @@ export const HomePage = () => {
         <section className="border-t border-brand-cocoa/10 bg-brand-shell">
           <div className="section-shell grid grid-cols-1 gap-16 py-32 lg:grid-cols-12">
             <div className="lg:col-span-3">
-              <p className="eyebrow">— I</p>
+              <p className="eyebrow">&mdash; I</p>
               <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">Manifesto</p>
             </div>
             <div className="lg:col-span-8 lg:col-start-5">
               <p className="font-display text-3xl font-light leading-snug text-brand-cocoa sm:text-4xl">
-                Agrobeso is a love letter to West African cooking — written in jollof, peanut soup,
+                Agrobeso is a love letter to West African cooking &mdash; written in jollof, peanut soup,
                 grilled tilapia and slow stews. Two kitchens, one table, generous as a Sunday afternoon.
               </p>
             </div>
@@ -123,13 +176,13 @@ export const HomePage = () => {
           <div className="section-shell py-32">
             <div className="grid grid-cols-1 gap-16 lg:grid-cols-12">
               <div className="lg:col-span-3">
-                <p className="eyebrow">— II</p>
+                <p className="eyebrow">&mdash; II</p>
                 <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">The Menu</p>
               </div>
               <div className="lg:col-span-8 lg:col-start-5">
                 <h2 className="display text-5xl sm:text-6xl">A short list, cooked properly.</h2>
                 <p className="mt-6 max-w-md font-display text-lg italic text-brand-cocoa/65">
-                  Each dish is a chapter. The full menu lives in our kitchens — call ahead for daily specials.
+                  Each dish is a chapter. The full menu lives in our kitchens &mdash; call ahead for daily specials.
                 </p>
               </div>
             </div>
@@ -138,14 +191,21 @@ export const HomePage = () => {
               <div className="lg:col-span-12">
                 {signatureDishes.map((dish, i) => {
                   const meta = dishStories[dish] ?? { story: 'Made with care, balanced spice and generous portions.', note: 'House favourite' };
+                  const slug = dishSlugMap[dish];
+                  const imgUrl = slug ? dishImgs[slug] : undefined;
                   return (
                     <article key={dish} className="dish">
                       <span className="dish__no">{String(i + 1).padStart(2, '0')}</span>
-                      <div>
-                        <h3 className="dish__name">{dish}</h3>
-                        <p className="dish__desc">{meta.story}</p>
+                      <div className="flex items-start gap-4">
+                        {imgUrl && (
+                          <img src={imgUrl} alt={dish} style={{width:'56px',height:'56px',objectFit:'cover',borderRadius:'6px',flexShrink:0}} />
+                        )}
+                        <div>
+                          <h3 className="dish__name">{dish}</h3>
+                          <p className="dish__desc">{meta.story}</p>
+                        </div>
                       </div>
-                      <span className="dish__origin hidden md:block">— {meta.note}</span>
+                      <span className="dish__origin hidden md:block">&mdash; {meta.note}</span>
                     </article>
                   );
                 })}
@@ -174,7 +234,7 @@ export const HomePage = () => {
         <section id="about" className="border-t border-brand-cocoa/10 bg-brand-cocoa text-brand-bone">
           <div className="section-shell grid grid-cols-1 gap-16 py-32 lg:grid-cols-12">
             <div className="lg:col-span-3">
-              <p className="font-mono text-[11px] uppercase tracking-widest2 text-brand-ochre">— III</p>
+              <p className="font-mono text-[11px] uppercase tracking-widest2 text-brand-ochre">&mdash; III</p>
               <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-bone/50">Heritage</p>
             </div>
             <div className="lg:col-span-8 lg:col-start-5">
@@ -183,7 +243,7 @@ export const HomePage = () => {
               </h2>
               <p className="mt-10 max-w-2xl font-display text-xl italic text-brand-bone/75">
                 Ghanaian cooking is patient. It rewards time with depth. Our kitchen honours
-                that — slow stews, hand-pounded fufu, fish grilled the moment you order.
+                that &mdash; slow stews, hand-pounded fufu, fish grilled the moment you order.
               </p>
               <p className="mt-8 max-w-xl text-[15px] leading-relaxed text-brand-bone/60">
                 From rich soups and stews to perfectly seasoned rice dishes and grilled fish,
@@ -198,13 +258,13 @@ export const HomePage = () => {
           <div className="section-shell py-32">
             <div className="grid grid-cols-1 gap-16 lg:grid-cols-12">
               <div className="lg:col-span-3">
-                <p className="eyebrow">— IV</p>
+                <p className="eyebrow">&mdash; IV</p>
                 <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">Two Tables</p>
               </div>
               <div className="lg:col-span-8 lg:col-start-5">
                 <h2 className="display text-5xl sm:text-6xl">South of the river.</h2>
                 <p className="mt-6 max-w-md font-display text-lg italic text-brand-cocoa/65">
-                  Find us in Peckham and Thornton Heath — same kitchen philosophy, two neighbourhoods.
+                  Find us in Peckham and Thornton Heath &mdash; same kitchen philosophy, two neighbourhoods.
                 </p>
               </div>
             </div>
@@ -244,7 +304,7 @@ export const HomePage = () => {
           <div className="section-shell py-32">
             <div className="grid grid-cols-1 gap-16 lg:grid-cols-12">
               <div className="lg:col-span-3">
-                <p className="eyebrow">— V</p>
+                <p className="eyebrow">&mdash; V</p>
                 <p className="mt-3 font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60">In the Kitchen</p>
               </div>
               <div className="lg:col-span-8 lg:col-start-5">
@@ -256,18 +316,40 @@ export const HomePage = () => {
             </div>
 
             <div className="mt-20 grid grid-cols-12 gap-6">
-              <div className="canvas-img col-span-12 aspect-[3/2] md:col-span-7" />
-              <div className="canvas-img-dark col-span-12 aspect-[3/2] md:col-span-5" />
-              <div className="canvas-img-dark col-span-6 aspect-square md:col-span-4" />
-              <div className="canvas-img col-span-6 aspect-square md:col-span-4" />
-              <div className="canvas-img col-span-12 aspect-[3/2] md:col-span-4" />
+              {galleryImgs.length > 0 ? (
+                <>
+                  <div className="col-span-12 aspect-[3/2] md:col-span-7 overflow-hidden">
+                    <img src={galleryImgs[0]} alt="Gallery 1" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="col-span-12 aspect-[3/2] md:col-span-5 overflow-hidden">
+                    {galleryImgs[1] ? <img src={galleryImgs[1]} alt="Gallery 2" className="w-full h-full object-cover" /> : <div className="canvas-img-dark w-full h-full" />}
+                  </div>
+                  <div className="col-span-6 aspect-square md:col-span-4 overflow-hidden">
+                    {galleryImgs[2] ? <img src={galleryImgs[2]} alt="Gallery 3" className="w-full h-full object-cover" /> : <div className="canvas-img-dark w-full h-full" />}
+                  </div>
+                  <div className="col-span-6 aspect-square md:col-span-4 overflow-hidden">
+                    {galleryImgs[3] ? <img src={galleryImgs[3]} alt="Gallery 4" className="w-full h-full object-cover" /> : <div className="canvas-img w-full h-full" />}
+                  </div>
+                  <div className="col-span-12 aspect-[3/2] md:col-span-4 overflow-hidden">
+                    {galleryImgs[4] ? <img src={galleryImgs[4]} alt="Gallery 5" className="w-full h-full object-cover" /> : <div className="canvas-img w-full h-full" />}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="canvas-img col-span-12 aspect-[3/2] md:col-span-7" />
+                  <div className="canvas-img-dark col-span-12 aspect-[3/2] md:col-span-5" />
+                  <div className="canvas-img-dark col-span-6 aspect-square md:col-span-4" />
+                  <div className="canvas-img col-span-6 aspect-square md:col-span-4" />
+                  <div className="canvas-img col-span-12 aspect-[3/2] md:col-span-4" />
+                </>
+              )}
             </div>
           </div>
         </section>
 
         <section id="ordering" className="border-t border-brand-cocoa/10 bg-brand-bone">
           <div className="section-shell py-32 text-center">
-            <p className="eyebrow">— VI / The invitation</p>
+            <p className="eyebrow">&mdash; VI / The invitation</p>
             <h2 className="display mt-8 text-5xl sm:text-7xl">Come and eat.</h2>
             <p className="mx-auto mt-8 max-w-xl font-display text-xl italic text-brand-cocoa/70">
               Walk in, call ahead for takeaway, or send a note for catering and group orders.
@@ -290,7 +372,7 @@ export const HomePage = () => {
         <section id="contact" className="border-t border-brand-cocoa/10 bg-brand-shell">
           <div className="section-shell grid grid-cols-1 gap-20 py-32 lg:grid-cols-12">
             <div className="lg:col-span-5">
-              <p className="eyebrow">— VII</p>
+              <p className="eyebrow">&mdash; VII</p>
               <h2 className="display mt-6 text-4xl sm:text-5xl">A private table?</h2>
               <p className="mt-6 max-w-sm font-display text-lg italic text-brand-cocoa/65">
                 For catering, group bookings and weekend specials, leave us a note.
