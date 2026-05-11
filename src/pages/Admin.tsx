@@ -1304,7 +1304,7 @@ export default function Admin() {
                     <div>
                       <label style={S.fieldLabel as React.CSSProperties}>Category</label>
                       <select value={imgCat} onChange={e => setImgCat(e.target.value)} style={S.input as React.CSSProperties}>
-                        {["gallery","hero","menu","about","event","general","dishes","peckham","thorntonheath","peckham","thorntonheath"].map(c => <option key={c} value={c}>{c}</option>)}
+                        {["gallery","hero","menu","about","event","general","dishes","peckham","thorntonheath"].map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                     <div>
@@ -1349,7 +1349,7 @@ export default function Admin() {
                               style={{ width: "100%", fontSize: "0.65rem", padding: "0.22rem 0.3rem", border: "1.5px solid #e0d8d0", borderRadius: "4px", background: "white", color: "#555", cursor: "pointer" }}
                             >
                               <option value="" disabled>{assigningImg === img.name ? "Copying…" : "＋ Copy to category…"}</option>
-                              {["gallery","hero","menu","about","event","general","dishes"].filter(c => c !== img.category).map(c => (
+                              {["gallery","hero","menu","about","event","general","dishes","peckham","thorntonheath"].filter(c => c !== img.category).map(c => (
                                 <option key={c} value={c}>{c}</option>
                               ))}
                             </select>
