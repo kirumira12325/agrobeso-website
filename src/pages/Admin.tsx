@@ -1311,10 +1311,10 @@ export default function Admin() {
                     </div>
                     <div>
                       <label style={S.fieldLabel as React.CSSProperties}>Image files</label>
-                      <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={e => setImgFiles(Array.from(e.target.files || []))} style={{ display: "none" }} />
-                  <button type="button" onClick={() => fileInputRef.current?.click()} style={{ ...S.btnSecondary, fontSize: "0.85rem", padding: "0.4rem 0.8rem" } as React.CSSProperties}>
-                    {imgFiles.length > 0 ? `${imgFiles.length} file${imgFiles.length > 1 ? "s" : ""} selected` : "📁 Choose files…"}
-                  </button>
+                      <label htmlFor="imgFileInput" style={{ ...S.btnSecondary, fontSize: "0.85rem", padding: "0.4rem 0.8rem", cursor: "pointer", display: "inline-block" } as React.CSSProperties}>
+                    {imgFiles.length > 0 ? `${imgFiles.length} file${imgFiles.length > 1 ? "s" : ""} selected ✓` : "📁 Choose files…"}
+                  </label>
+                  <input id="imgFileInput" ref={fileInputRef} type="file" accept="image/*" multiple onChange={e => setImgFiles(Array.from(e.target.files || []))} style={{ display: "none" }} />
                     </div>
                   </div>
                  <button onClick={handleImgUpload} disabled={uploading || imgFiles.length === 0} style={{ ...S.btnPrimary, opacity: uploading || imgFiles.length === 0 ? 0.5 : 1 } as React.CSSProperties}>
