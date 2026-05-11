@@ -92,7 +92,7 @@ body {
     grid-template-columns: 1fr;
 }
 
-@media (min-width: 1024) {
+@media (min-width: 1024px) {
     .dish {
         @apply gap-8 py-10;
         grid-template-columns: 160px 1fr auto;
@@ -121,7 +121,7 @@ body {
             order: 1;
     }
 
-@media (min-width: 1024) {
+@media (min-width: 1024px) {
     .dish__img {
         width: 160px;
         height: 160px;
@@ -138,7 +138,7 @@ body {
     display: none;
 }
 
-@media (min-width: 1024) {
+@media (min-width: 1024px) {
     .dish__img-placeholder {
         display: block;
         width: 160px;
