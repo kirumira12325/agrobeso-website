@@ -132,6 +132,7 @@ export const HomePage = () => {
   const [dishImgs, setDishImgs] = useState<Record<string, string>>({});
   const [galleryImgs, setGalleryImgs] = useState<string[]>([]);
   const [heroImg, setHeroImg] = useState<string>('');
+  const [minimizedImgs, setMinimizedImgs] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     supabase
@@ -311,7 +312,26 @@ export const HomePage = () => {
                   return (
                     <article key={dish} className="dish">
                       {imgUrl && (
-                        <img src={imgUrl} alt={dish} className="dish__img" style={{width:'56px',height:'56px',objectFit:'cover',borderRadius:'6px',flexShrink:0}} />
+                        <img
+                          src={imgUrl}
+                          alt={dish}
+                          className="dish__img"
+                          title={minimizedImgs.has(i) ? 'Click to expand' : 'Click to minimise'}
+                          onClick={() => {
+                            const next = new Set(minimizedImgs);
+                            if (next.has(i)) next.delete(i); else next.add(i);
+                            setMinimizedImgs(next);
+                          }}
+                          style={{
+                            width: minimizedImgs.has(i) ? '56px' : '168px',
+                            height: minimizedImgs.has(i) ? '56px' : '168px',
+                            objectFit: 'cover',
+                            borderRadius: '8px',
+                            flexShrink: 0,
+                            cursor: 'pointer',
+                            transition: 'width 0.3s ease, height 0.3s ease',
+                          }}
+                        />
                       )}
                       <span className="dish__no">{String(i + 1).padStart(2, '0')}</span>
                       <div>
