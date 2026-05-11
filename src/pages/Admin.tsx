@@ -720,7 +720,7 @@ export default function Admin() {
   const [globalSave, setGlobalSave] = useState<"idle"|"saving"|"saved"|"error">("idle");
   const [imgFiles, setImgFiles] = useState<File[]>([]);
   const [imgCat, setImgCat] = useState("gallery");
-  const [fileInputKey, setFileInputKey] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [imgMsg, setImgMsg] = useState("");
@@ -921,7 +921,7 @@ export default function Admin() {
       setImgMsg(`${successCount} uploaded, ${failCount} failed.`);
     }
     setImgFiles([]);
-    setFileInputKey(k => k + 1);
+    if (fileInputRef.current) fileInputRef.current.value = "";
     await loadImages();
     setUploading(false);
   };
@@ -1311,17 +1311,13 @@ export default function Admin() {
                     </div>
                     <div>
                       <label style={S.fieldLabel as React.CSSProperties}>Image files</label>
-                      <input key={fileInputKey} type="file" accept="image/*" multiple onChange={e => setImgFiles(Array.from(e.target.files || []))} style={{ fontSize: "0.85rem", paddingTop: "0.45rem" }} />
+                      <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={e => setImgFiles(Array.from(e.target.files || []))} style={{ display: "none" }} />
+                  <button type="button" onClick={() => fileInputRef.current?.click()} style={{ ...S.btnSecondary, fontSize: "0.85rem", padding: "0.4rem 0.8rem" } as React.CSSProperties}>
+                    {imgFiles.length > 0 ? `${imgFiles.length} file${imgFiles.length > 1 ? "s" : ""} selected` : "📁 Choose files…"}
+                  </button>
                     </div>
                   </div>
-                  {imgFiles.length > 0 && (
-                    <p style={{ fontSize: "0.8rem", padding: "0.35rem 0.65rem", background: "#f5f0ea", borderRadius: "5px", marginBottom: "0.75rem" }}>
-                      {imgFiles.length === 1
-                        ? `📎 ${imgFiles[0].name} (${(imgFiles[0].size / 1024).toFixed(0)} KB)`
-                        : `📎 ${imgFiles.length} files selected (${(imgFiles.reduce((s, f) => s + f.size, 0) / 1024).toFixed(0)} KB total)`}
-                    </p>
-                  )}
-                  <button onClick={handleImgUpload} disabled={uploading || imgFiles.length === 0} style={{ ...S.btnPrimary, opacity: uploading || imgFiles.length === 0 ? 0.5 : 1 } as React.CSSProperties}>
+                 <button onClick={handleImgUpload} disabled={uploading || imgFiles.length === 0} style={{ ...S.btnPrimary, opacity: uploading || imgFiles.length === 0 ? 0.5 : 1 } as React.CSSProperties}>
                     {uploading ? "Uploading…" : "⬆ Upload Image"}
                   </button>
                   {imgMsg && <p style={{ marginTop: "0.6rem", padding: "0.45rem 0.75rem", background: imgMsg.includes("fail") ? "#fee8e8" : "#e8f8ee", borderRadius: "6px", fontSize: "0.82rem", color: imgMsg.includes("fail") ? "#c00" : "#1a7a3a" }}>{imgMsg}</p>}
