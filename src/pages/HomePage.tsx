@@ -3,7 +3,7 @@ import { buildMapUrl, buildRestaurantSchema } from '@/lib/schema';
 import { signatureDishes, menuGroups } from '@/data/restaurant';
 import { agrobesoSupabase as supabase } from '../integrations/supabase/agrobeso-client';
 
-const STORAGE_URL = 'https://lsgxrluiwsxuhsjcvdue.supabase.co/storage/v1/object/public/images';
+const STORAGE_URL = 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images';
 
 const navItems = [
   { label: 'Menu', href: '#menu' },
