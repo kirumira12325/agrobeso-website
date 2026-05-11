@@ -720,6 +720,7 @@ export default function Admin() {
   const [globalSave, setGlobalSave] = useState<"idle"|"saving"|"saved"|"error">("idle");
   const [imgFiles, setImgFiles] = useState<File[]>([]);
   const [imgCat, setImgCat] = useState("gallery");
+  const [fileInputKey, setFileInputKey] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [imgMsg, setImgMsg] = useState("");
@@ -920,6 +921,7 @@ export default function Admin() {
       setImgMsg(`${successCount} uploaded, ${failCount} failed.`);
     }
     setImgFiles([]);
+    setFileInputKey(k => k + 1);
     await loadImages();
     setUploading(false);
   };
@@ -1309,7 +1311,7 @@ export default function Admin() {
                     </div>
                     <div>
                       <label style={S.fieldLabel as React.CSSProperties}>Image files</label>
-                      <input type="file" accept="image/*" multiple onChange={e => setImgFiles(Array.from(e.target.files || []))} style={{ fontSize: "0.85rem", paddingTop: "0.45rem" }} />
+                      <input key={fileInputKey} type="file" accept="image/*" multiple onChange={e => setImgFiles(Array.from(e.target.files || []))} style={{ fontSize: "0.85rem", paddingTop: "0.45rem" }} />
                     </div>
                   </div>
                   {imgFiles.length > 0 && (
