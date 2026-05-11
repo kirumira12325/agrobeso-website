@@ -422,18 +422,10 @@ export const HomePage = () => {
                             if (next.has(i)) next.delete(i); else next.add(i);
                             setMinimizedImgs(next);
                           }}
-                          style={{
-                            width: minimizedImgs.has(i) ? '56px' : '160px',
-                            height: minimizedImgs.has(i) ? '56px' : '160px',
-                            objectFit: 'cover',
-                            borderRadius: '8px',
-                            flexShrink: 0,
-                            cursor: 'pointer',
-                            transition: 'width 0.3s ease, height 0.3s ease',
-                          }}
+                          data-minimized={minimizedImgs.has(i) ? 'true' : 'false'}
                         />
                       ) : (
-                        <div style={{width:'160px',flexShrink:0}} />
+                        <div className="dish__img-placeholder" />
                       )}
                       <div>
                         <span className="dish__no">{String(i + 1).padStart(2, '0')}</span>
