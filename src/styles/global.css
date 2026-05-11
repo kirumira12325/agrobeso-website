@@ -88,11 +88,56 @@ body {
 
 /* ---------- Dish list ---------- */
 .dish {
-    @apply grid grid-cols-[160px_1fr_auto] items-start gap-8 border-t border-brand-cocoa/15 py-10;
+    @apply grid items-start gap-5 border-t border-brand-cocoa/15 py-8;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+    .dish {
+        @apply gap-8 py-10;
+        grid-template-columns: 160px 1fr auto;
+    }
 }
 
 .dish:last-child {
     @apply border-b;
+}
+
+/* Dish image — responsive: full width on mobile, fixed 160px on >=sm */
+.dish__img {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    display: block;
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+@media (min-width: 640px) {
+    .dish__img {
+        width: 160px;
+        height: 160px;
+        aspect-ratio: auto;
+        flex-shrink: 0;
+    }
+    .dish__img[data-minimized="true"] {
+        width: 56px;
+        height: 56px;
+    }
+}
+
+.dish__img-placeholder {
+    display: none;
+}
+
+@media (min-width: 640px) {
+    .dish__img-placeholder {
+        display: block;
+        width: 160px;
+        flex-shrink: 0;
+    }
 }
 
 .dish__no {
