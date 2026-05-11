@@ -718,7 +718,7 @@ export default function Admin() {
   const [savedField, setSavedField] = useState<string|null>(null);
   const [loadingContent, setLoadingContent] = useState(false);
   const [globalSave, setGlobalSave] = useState<"idle"|"saving"|"saved"|"error">("idle");
-  const [imgFile, setImgFile] = useState<File|null>(null);
+  const [imgFiles, setImgFiles] = useState<File[]>([]);
   const [imgCat, setImgCat] = useState("gallery");
   const [uploading, setUploading] = useState(false);
   const [images, setImages] = useState<UploadedImage[]>([]);
@@ -896,12 +896,25 @@ export default function Admin() {
   };
 
   const handleImgUpload = async () => {
-    if (!imgFile) return;
+    if (imgFiles.length === 0) return;
     setUploading(true); setImgMsg("");
-    const fileName = imgCat + "-" + Date.now() + "-" + imgFile.name.replace(/\s+/g,"_");
-    const { error } = await supabase.storage.from("images").upload(fileName, imgFile, { upsert: true });
-    if (error) setImgMsg("Upload failed: " + error.message);
-    else { setImgMsg("Uploaded!"); setImgFile(null); await loadImages(); }
+    let successCount = 0;
+    let failCount = 0;
+    for (let i = 0; i < imgFiles.length; i++) {
+      const file = imgFiles[i];
+      setImgMsg(`Uploading ${i + 1}/${imgFiles.length}: ${file.name}…`);
+      const fileName = imgCat + "-" + Date.now() + "-" + file.name.replace(/\s+/g, "_");
+      const { error } = await supabase.storage.from("images").upload(fileName, file, { upsert: true });
+      if (error) { failCount++; }
+      else { successCount++; }
+    }
+    if (failCount === 0) {
+      setImgMsg(successCount === 1 ? "Uploaded!" : `✓ ${successCount} images uploaded!`);
+    } else {
+      setImgMsg(`${successCount} uploaded, ${failCount} failed.`);
+    }
+    setImgFiles([]);
+    await loadImages();
     setUploading(false);
   };
 
@@ -1266,12 +1279,18 @@ export default function Admin() {
                       </select>
                     </div>
                     <div>
-                      <label style={S.fieldLabel as React.CSSProperties}>Image file</label>
-                      <input type="file" accept="image/*" onChange={e => setImgFile(e.target.files?.[0] || null)} style={{ fontSize: "0.85rem", paddingTop: "0.45rem" }} />
+                      <label style={S.fieldLabel as React.CSSProperties}>Image files</label>
+                      <input type="file" accept="image/*" multiple onChange={e => setImgFiles(Array.from(e.target.files || []))} style={{ fontSize: "0.85rem", paddingTop: "0.45rem" }} />
                     </div>
                   </div>
-                  {imgFile && <p style={{ fontSize: "0.8rem", padding: "0.35rem 0.65rem", background: "#f5f0ea", borderRadius: "5px", marginBottom: "0.75rem" }}>📎 {imgFile.name} ({(imgFile.size / 1024).toFixed(0)} KB)</p>}
-                  <button onClick={handleImgUpload} disabled={uploading || !imgFile} style={{ ...S.btnPrimary, opacity: uploading || !imgFile ? 0.5 : 1 } as React.CSSProperties}>
+                  {imgFiles.length > 0 && (
+                    <p style={{ fontSize: "0.8rem", padding: "0.35rem 0.65rem", background: "#f5f0ea", borderRadius: "5px", marginBottom: "0.75rem" }}>
+                      {imgFiles.length === 1
+                        ? `📎 ${imgFiles[0].name} (${(imgFiles[0].size / 1024).toFixed(0)} KB)`
+                        : `📎 ${imgFiles.length} files selected (${(imgFiles.reduce((s, f) => s + f.size, 0) / 1024).toFixed(0)} KB total)`}
+                    </p>
+                  )}
+                  <button onClick={handleImgUpload} disabled={uploading || imgFiles.length === 0} style={{ ...S.btnPrimary, opacity: uploading || imgFiles.length === 0 ? 0.5 : 1 } as React.CSSProperties}>
                     {uploading ? "Uploading…" : "⬆ Upload Image"}
                   </button>
                   {imgMsg && <p style={{ marginTop: "0.6rem", padding: "0.45rem 0.75rem", background: imgMsg.includes("fail") ? "#fee8e8" : "#e8f8ee", borderRadius: "6px", fontSize: "0.82rem", color: imgMsg.includes("fail") ? "#c00" : "#1a7a3a" }}>{imgMsg}</p>}
