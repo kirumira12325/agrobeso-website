@@ -7,7 +7,7 @@
 :root {
     font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     color: #2A1810;
-    background-color: #F4EFE6
+    background-color: #F4EFE6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
