@@ -126,6 +126,18 @@ const dishSlugMap: Record<string, string> = {
   'Tuo Zaafi': 'tuo_zaafi',
 };
 
+// Reverse map: slug → display name
+const slugToName: Record<string, string> = {
+  jollof_rice: 'Jollof Rice',
+  waakye: 'Waakye',
+  kenkey_fish: 'Kenkey & Fish',
+  banku_okra: 'Banku & Okra Stew',
+  peanut_soup: 'Peanut Soup',
+  fufu: 'Fufu / Pounded Yam',
+  fried_fish: 'Fried Fish / Tilapia',
+  tuo_zaafi: 'Tuo Zaafi',
+};
+
 export const HomePage = () => {
   const schema = buildRestaurantSchema();
   const [c, setC] = useState<Record<string, string>>(defaultContent);
@@ -134,6 +146,10 @@ export const HomePage = () => {
   const [heroImg, setHeroImg] = useState<string>('');
   const [minimizedImgs, setMinimizedImgs] = useState<Set<number>>(new Set());
   const [locationImgs, setLocationImgs] = useState<Record<string, string>>({});
+  const [heroSlideshow, setHeroSlideshow] = useState<{slug: string; name: string; imgUrl: string; num: number}[]>([]);
+  const [heroSlideIdx, setHeroSlideIdx] = useState(0);
+  const [heroFading, setHeroFading] = useState(false);
+  const [heroSlideshowSlugs, setHeroSlideshowSlugs] = useState<string[]>([]);
 
   useEffect(() => {
     supabase
@@ -150,6 +166,8 @@ export const HomePage = () => {
               designTokens[row.id.replace('design__', '')] = row.value;
             } else if (row.id.startsWith('dish_img__')) {
               dishImageMap[row.id.replace('dish_img__', '')] = row.value;
+            } else if (row.id === 'hero_slideshow') {
+              setHeroSlideshowSlugs(row.value ? row.value.split(',').map((x: string) => x.trim()).filter(Boolean) : []);
             } else {
               map[row.id] = row.value;
             }
@@ -202,6 +220,33 @@ export const HomePage = () => {
         }
       });
   }, []);
+
+  // Build slideshow list whenever dishImgs or heroSlideshowSlugs change
+  useEffect(() => {
+    const allSlugs = Object.keys(dishImgs);
+    const featured = heroSlideshowSlugs.length > 0 ? heroSlideshowSlugs.filter(sl => dishImgs[sl]) : allSlugs;
+    const slides = featured.map((slug, i) => ({
+      slug,
+      name: slugToName[slug] || slug,
+      imgUrl: dishImgs[slug],
+      num: i + 1,
+    }));
+    setHeroSlideshow(slides);
+    setHeroSlideIdx(0);
+  }, [dishImgs, heroSlideshowSlugs]);
+
+  // Auto-advance timer
+  useEffect(() => {
+    if (heroSlideshow.length < 2) return;
+    const timer = setInterval(() => {
+      setHeroFading(true);
+      setTimeout(() => {
+        setHeroSlideIdx(prev => (prev + 1) % heroSlideshow.length);
+        setHeroFading(false);
+      }, 400);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [heroSlideshow]);
 
   const peckham = {
     id: 'peckham' as const,
@@ -266,7 +311,51 @@ export const HomePage = () => {
               </div>
             </div>
             <div className="lg:col-span-5">
-              {heroImg ? (
+              {heroSlideshow.length > 0 ? (
+                <div className="aspect-[4/5] w-full overflow-hidden rounded-lg relative" style={{position:'relative'}}>
+                  {heroSlideshow.map((slide, idx) => (
+                    <div
+                      key={slide.slug}
+                      style={{
+                        position: idx === 0 ? 'relative' : 'absolute',
+                        inset: 0,
+                        width: '100%',
+                        height: '100%',
+                        opacity: idx === heroSlideIdx ? (heroFading ? 0 : 1) : 0,
+                        transition: 'opacity 0.4s ease',
+                        pointerEvents: idx === heroSlideIdx ? 'auto' : 'none',
+                      }}
+                    >
+                      <img src={slide.imgUrl} alt={slide.name} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-10 text-brand-bone">
+                        <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/70">No. {String(slide.num).padStart(2,'0')} / Of the season</p>
+                        <p className="mt-4 font-display text-3xl italic">{slide.name}</p>
+                        {heroSlideshow.length > 1 && (
+                          <div style={{display:'flex',gap:'6px',marginTop:'12px'}}>
+                            {heroSlideshow.map((_, di) => (
+                              <button
+                                key={di}
+                                aria-label={`Go to slide ${di+1}`}
+                                onClick={() => { setHeroFading(true); setTimeout(() => { setHeroSlideIdx(di); setHeroFading(false); }, 400); }}
+                                style={{
+                                  width: di === heroSlideIdx ? '20px' : '6px',
+                                  height: '6px',
+                                  borderRadius: '3px',
+                                  background: di === heroSlideIdx ? '#fff' : 'rgba(255,255,255,0.45)',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: 0,
+                                  transition: 'width 0.3s ease, background 0.3s ease',
+                                }}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : heroImg ? (
                 <div className="aspect-[4/5] w-full overflow-hidden rounded-lg relative">
                   <img src={heroImg} alt="Agrobeso hero" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-10 text-brand-bone">
