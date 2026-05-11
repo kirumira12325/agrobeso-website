@@ -322,7 +322,7 @@ export const HomePage = () => {
                   const imgUrl = slug ? dishImgs[slug] : undefined;
                   return (
                     <article key={dish} className="dish">
-                      {imgUrl && (
+                      {imgUrl ? (
                         <img
                           src={imgUrl}
                           alt={dish}
@@ -343,13 +343,15 @@ export const HomePage = () => {
                             transition: 'width 0.3s ease, height 0.3s ease',
                           }}
                         />
+                      ) : (
+                        <div style={{width:'160px',flexShrink:0}} />
                       )}
-                      <span className="dish__no">{String(i + 1).padStart(2, '0')}</span>
                       <div>
+                        <span className="dish__no">{String(i + 1).padStart(2, '0')}</span>
                         <h3 className="dish__name">{dish}</h3>
                         <p className="dish__desc">{story}</p>
+                        <span className="dish__origin">— {note}</span>
                       </div>
-                      <span className="dish__origin hidden md:block">— {note}</span>
                     </article>
                   );
                 })}
