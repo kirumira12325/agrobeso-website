@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { buildMapUrl, buildRestaurantSchema } from '@/lib/schema';
 import { heroContent, locations, menuGroups, signatureDishes } from '@/data/restaurant';
 import { supabase, STORAGE_URL } from '@/lib/supabase';
@@ -60,11 +60,74 @@ const dishSlugMap: Record<string, string> = {
   'Tuo Zaafi': 'tuo_zaafi',
 };
 
+// ── Lightbox ────────────────────────────────────────────────────────────────
+interface LightboxProps {
+  src: string;
+  alt: string;
+  onClose: () => void;
+}
+
+const Lightbox = ({ src, alt, onClose }: LightboxProps) => {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: 'rgba(0,0,0,0.88)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        cursor: 'zoom-out',
+      }}
+    >
+      <button
+        onClick={onClose}
+        aria-label="Close"
+        style={{
+          position: 'absolute', top: '1.25rem', right: '1.5rem',
+          background: 'none', border: 'none', color: '#fff',
+          fontSize: '2rem', lineHeight: 1, cursor: 'pointer',
+          opacity: 0.75, padding: '0.25rem 0.5rem',
+        }}
+      >
+        &times;
+      </button>
+      <img
+        src={src}
+        alt={alt}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: '90vw', maxHeight: '88vh',
+          objectFit: 'contain', borderRadius: '6px',
+          boxShadow: '0 8px 48px rgba(0,0,0,0.6)',
+          cursor: 'default',
+        }}
+      />
+    </div>
+  );
+};
+
+// ── HomePage ─────────────────────────────────────────────────────────────────
 export const HomePage = () => {
   const schema = buildRestaurantSchema();
   const [dishImgs, setDishImgs] = useState<Record<string, string>>({});
   const [galleryImgs, setGalleryImgs] = useState<string[]>([]);
   const [heroImg, setHeroImg] = useState<string>('');
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
+
+  const openLightbox = useCallback((src: string, alt: string) => {
+    setLightbox({ src, alt });
+  }, []);
+
+  const closeLightbox = useCallback(() => setLightbox(null), []);
 
   useEffect(() => {
     supabase.storage.from('images').list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
@@ -95,6 +158,8 @@ export const HomePage = () => {
 
   return (
     <>
+      {lightbox && <Lightbox src={lightbox.src} alt={lightbox.alt} onClose={closeLightbox} />}
+
       <header className="sticky top-0 z-50 border-b border-brand-cocoa/10 bg-brand-bone/85 backdrop-blur-md">
         <div className="section-shell flex items-center justify-between py-5">
           <a href="#top" className="font-display text-2xl font-light tracking-tightest text-brand-cocoa">
@@ -117,7 +182,7 @@ export const HomePage = () => {
         <section className="hero-pattern relative overflow-hidden">
           <div className="section-shell grid min-h-[88vh] grid-cols-1 items-center gap-16 py-24 lg:grid-cols-12 lg:gap-8">
             <div className="lg:col-span-7 reveal">
-              <p className="eyebrow mb-10">&mdash; Est. South London &middot; Ghanaian Kitchen</p>
+              <p className="eyebrow">&mdash; Est. South London &middot; Ghanaian Kitchen</p>
               <h1 className="display text-[clamp(56px,9vw,144px)]">
                 The taste<br />
                 of home,<br />
@@ -138,7 +203,11 @@ export const HomePage = () => {
 
             <div className="lg:col-span-5">
               {heroImg ? (
-                <div className="aspect-[4/5] w-full overflow-hidden relative">
+                <div
+                  className="aspect-[4/5] w-full overflow-hidden relative cursor-zoom-in"
+                  onClick={() => openLightbox(heroImg, 'Agrobeso featured dish')}
+                  title="Click to expand"
+                >
                   <img src={heroImg} alt="Agrobeso featured dish" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-10 text-brand-bone">
                     <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/70">No. 01 / Of the season</p>
@@ -196,9 +265,30 @@ export const HomePage = () => {
                   return (
                     <article key={dish} className="dish">
                       <span className="dish__no">{String(i + 1).padStart(2, '0')}</span>
-                      <div className="flex items-start gap-4">
-                        {imgUrl && (
-                          <img src={imgUrl} alt={dish} style={{width:'56px',height:'56px',objectFit:'cover',borderRadius:'6px',flexShrink:0}} />
+                      <div className="flex items-start gap-6">
+                        {imgUrl ? (
+                          <img
+                            src={imgUrl}
+                            alt={dish}
+                            onClick={() => openLightbox(imgUrl, dish)}
+                            title="Click to expand"
+                            style={{
+                              width: '168px', height: '168px',
+                              objectFit: 'cover', borderRadius: '8px',
+                              flexShrink: 0, cursor: 'zoom-in',
+                              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                            }}
+                            onMouseEnter={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.transform = 'scale(1.03)';
+                              (e.currentTarget as HTMLImageElement).style.boxShadow = '0 6px 24px rgba(0,0,0,0.18)';
+                            }}
+                            onMouseLeave={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.transform = 'scale(1)';
+                              (e.currentTarget as HTMLImageElement).style.boxShadow = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div style={{ width: '168px', height: '168px', borderRadius: '8px', flexShrink: 0, background: '#e8e2d9' }} />
                         )}
                         <div>
                           <h3 className="dish__name">{dish}</h3>
@@ -318,20 +408,47 @@ export const HomePage = () => {
             <div className="mt-20 grid grid-cols-12 gap-6">
               {galleryImgs.length > 0 ? (
                 <>
-                  <div className="col-span-12 aspect-[3/2] md:col-span-7 overflow-hidden">
-                    <img src={galleryImgs[0]} alt="Gallery 1" className="w-full h-full object-cover" />
+                  <div
+                    className="col-span-12 aspect-[3/2] md:col-span-7 overflow-hidden cursor-zoom-in"
+                    onClick={() => openLightbox(galleryImgs[0], 'Gallery 1')}
+                  >
+                    <img src={galleryImgs[0]} alt="Gallery 1" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                   </div>
                   <div className="col-span-12 aspect-[3/2] md:col-span-5 overflow-hidden">
-                    {galleryImgs[1] ? <img src={galleryImgs[1]} alt="Gallery 2" className="w-full h-full object-cover" /> : <div className="canvas-img-dark w-full h-full" />}
+                    {galleryImgs[1] ? (
+                      <img
+                        src={galleryImgs[1]} alt="Gallery 2"
+                        className="w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-300"
+                        onClick={() => openLightbox(galleryImgs[1], 'Gallery 2')}
+                      />
+                    ) : <div className="canvas-img-dark w-full h-full" />}
                   </div>
                   <div className="col-span-6 aspect-square md:col-span-4 overflow-hidden">
-                    {galleryImgs[2] ? <img src={galleryImgs[2]} alt="Gallery 3" className="w-full h-full object-cover" /> : <div className="canvas-img-dark w-full h-full" />}
+                    {galleryImgs[2] ? (
+                      <img
+                        src={galleryImgs[2]} alt="Gallery 3"
+                        className="w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-300"
+                        onClick={() => openLightbox(galleryImgs[2], 'Gallery 3')}
+                      />
+                    ) : <div className="canvas-img-dark w-full h-full" />}
                   </div>
                   <div className="col-span-6 aspect-square md:col-span-4 overflow-hidden">
-                    {galleryImgs[3] ? <img src={galleryImgs[3]} alt="Gallery 4" className="w-full h-full object-cover" /> : <div className="canvas-img w-full h-full" />}
+                    {galleryImgs[3] ? (
+                      <img
+                        src={galleryImgs[3]} alt="Gallery 4"
+                        className="w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-300"
+                        onClick={() => openLightbox(galleryImgs[3], 'Gallery 4')}
+                      />
+                    ) : <div className="canvas-img w-full h-full" />}
                   </div>
                   <div className="col-span-12 aspect-[3/2] md:col-span-4 overflow-hidden">
-                    {galleryImgs[4] ? <img src={galleryImgs[4]} alt="Gallery 5" className="w-full h-full object-cover" /> : <div className="canvas-img w-full h-full" />}
+                    {galleryImgs[4] ? (
+                      <img
+                        src={galleryImgs[4]} alt="Gallery 5"
+                        className="w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-300"
+                        onClick={() => openLightbox(galleryImgs[4], 'Gallery 5')}
+                      />
+                    ) : <div className="canvas-img w-full h-full" />}
                   </div>
                 </>
               ) : (
