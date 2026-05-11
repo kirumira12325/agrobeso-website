@@ -97,6 +97,8 @@ body {
         @apply gap-8 py-10;
         grid-template-columns: 160px 1fr auto;
     }
+        .dish__img { order: 0; }
+        .dish > div { order: 0; }
 }
 
 .dish:last-child {
