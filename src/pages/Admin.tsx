@@ -733,6 +733,9 @@ export default function Admin() {
   const [designSaving, setDesignSaving] = useState(false);
   const [designSaved, setDesignSaved] = useState(false);
   const [activeSections, setActiveSections] = useState<CustomSection[]>([]);
+  const [slideshowSlugs, setSlideshowSlugs] = useState<string[]>([]);
+  const [slideshowSaving, setSlideshowSaving] = useState(false);
+  const [slideshowSaved, setSlideshowSaved] = useState(false);
   const [sectionSaving, setSectionSaving] = useState(false);
   const [settings, setSettings] = useState<Record<string,string>>({
     site_name: "Agrobeso", tagline: "Authentic Ghanaian & West African Food",
@@ -797,6 +800,8 @@ export default function Admin() {
       DESIGN_GROUPS.forEach(g => g.tokens.forEach(t => { defaultDes[t.id] = t.default; }));
       setDesign({ ...defaultDes, ...des });
       setDishImages(dishImg);
+      const ssRow = data.find((r) => r.id === 'hero_slideshow');
+      if (ssRow && ssRow.value) setSlideshowSlugs(ssRow.value.split(',').map((x) => x.trim()).filter(Boolean));
       if (Object.keys(set).length > 0) setSettings(prev => ({ ...prev, ...set }));
       // Load custom dishes
       if (Object.keys(dishData).length > 0) {
@@ -1091,6 +1096,11 @@ export default function Admin() {
   };
   const handleDragEnd = () => { setDragIdx(null); setDragOverIdx(null); };
 
+  const saveHeroSlideshow = async () => {
+    setSlideshowSaving(true);
+    await supabase.from('site_content').upsert([{ id: 'hero_slideshow', value: slideshowSlugs.join(','), updated_at: new Date().toISOString() }], { onConflict: 'id' });
+    setSlideshowSaving(false); setSlideshowSaved(true); setTimeout(() => setSlideshowSaved(false), 2000);
+  };
   // ─── Login screen ──────────────────────────────────────────────────────────
   if (!authed) return (
     <div style={{ minHeight: "100vh", background: "#f5f0eb", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -1472,6 +1482,25 @@ export default function Admin() {
                     })}
                   </div>
                 }
+              </div>
+            )}
+
+            {tab === "dishes" && (
+              <div style={{ marginTop: "2rem", padding: "1.5rem", background: "#fff9f5", borderRadius: "10px", border: "1px solid #e8d5c4" }}>
+                <h3 style={{ margin: "0 0 0.5rem", fontSize: "1rem", fontWeight: 600, color: "#3a2015" }}>Hero Slideshow</h3>
+                <p style={{ margin: "0 0 1.2rem", fontSize: "0.8rem", color: "#7a5a44" }}>Select which dish photos cycle in the hero. Leave all unselected to show all available dish images.</p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(150px,1fr))", gap: "0.75rem", marginBottom: "1.2rem" }}>
+                  {[['jollof_rice','Jollof Rice'],['waakye','Waakye'],['kenkey_fish','Kenkey & Fish'],['banku_okra','Banku & Okra Stew'],['peanut_soup','Peanut Soup'],['fufu','Fufu / Pounded Yam'],['fried_fish','Fried Fish / Tilapia'],['tuo_zaafi','Tuo Zaafi']].filter(([sl]) => dishImages[sl]).map(([slug, name]) => (
+                    <label key={slug} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0.75rem", background: slideshowSlugs.includes(slug) ? "#fce8dc" : "#f5ede6", borderRadius: "8px", cursor: "pointer", border: slideshowSlugs.includes(slug) ? "1.5px solid #b04a2a" : "1px solid #d4b8a8" }}>
+                      <input type="checkbox" checked={slideshowSlugs.includes(slug)} onChange={e => setSlideshowSlugs(prev => e.target.checked ? [...prev, slug] : prev.filter(ss => ss !== slug))} />
+                      <img src={dishImages[slug]} alt={name} style={{ width: "36px", height: "36px", objectFit: "cover", borderRadius: "4px", flexShrink: 0 }} />
+                      <span style={{ fontSize: "0.75rem", color: "#3a2015" }}>{name}</span>
+                    </label>
+                  ))}
+                </div>
+                <button onClick={saveHeroSlideshow} disabled={slideshowSaving} style={{ padding: "0.4rem 1.2rem", background: slideshowSaved ? "#27ae60" : "#b04a2a", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "0.8rem" }}>
+                  {slideshowSaving ? "Saving..." : slideshowSaved ? "Saved!" : "Save Slideshow"}
+                </button>
               </div>
             )}
 
