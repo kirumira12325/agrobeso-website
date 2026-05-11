@@ -1294,7 +1294,7 @@ export default function Admin() {
                     <div>
                       <label style={S.fieldLabel as React.CSSProperties}>Category</label>
                       <select value={imgCat} onChange={e => setImgCat(e.target.value)} style={S.input as React.CSSProperties}>
-                        {["gallery","hero","menu","about","event","general","dishes"].map(c => <option key={c} value={c}>{c}</option>)}
+                        {["gallery","hero","menu","about","event","general","dishes","peckham","thorntonheath","peckham","thorntonheath"].map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                     <div>
