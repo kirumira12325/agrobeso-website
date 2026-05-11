@@ -133,6 +133,7 @@ export const HomePage = () => {
   const [galleryImgs, setGalleryImgs] = useState<string[]>([]);
   const [heroImg, setHeroImg] = useState<string>('');
   const [minimizedImgs, setMinimizedImgs] = useState<Set<number>>(new Set());
+  const [locationImgs, setLocationImgs] = useState<Record<string, string>>({});
 
   useEffect(() => {
     supabase
@@ -188,6 +189,16 @@ export const HomePage = () => {
 
           if (heroFiles.length > 0) setHeroImg(heroFiles[0]);
           if (galleryOnlyFiles.length > 0) setGalleryImgs(galleryOnlyFiles);
+
+          // Load location images
+          const locImgMap: Record<string, string> = {};
+          data.forEach((f: any) => {
+            if (f.name && f.name !== '.emptyFolderPlaceholder') {
+              if (f.name.startsWith('peckham-')) locImgMap['peckham'] = STORAGE_URL + '/' + f.name;
+              if (f.name.startsWith('thorntonheath-')) locImgMap['thorntonheath'] = STORAGE_URL + '/' + f.name;
+            }
+          });
+          setLocationImgs(locImgMap);
         }
       });
   }, []);
@@ -323,8 +334,8 @@ export const HomePage = () => {
                             setMinimizedImgs(next);
                           }}
                           style={{
-                            width: minimizedImgs.has(i) ? '56px' : '168px',
-                            height: minimizedImgs.has(i) ? '56px' : '168px',
+                            width: minimizedImgs.has(i) ? '56px' : '160px',
+                            height: minimizedImgs.has(i) ? '56px' : '160px',
                             objectFit: 'cover',
                             borderRadius: '8px',
                             flexShrink: 0,
@@ -397,6 +408,15 @@ export const HomePage = () => {
                     <a href={buildMapUrl(location.mapsQuery)} target="_blank" rel="noreferrer" className="border-b border-brand-cocoa pb-1 text-brand-cocoa transition hover:text-brand-clay">Directions &rarr;</a>
                     <a href={location.phoneHref} className="border-b border-brand-cocoa/30 pb-1 text-brand-cocoa/70 transition hover:border-brand-cocoa hover:text-brand-cocoa">Call</a>
                   </div>
+                  {locationImgs[location.id.replace('-', '')] && (
+                    <div className="mt-8 overflow-hidden rounded-lg">
+                      <img
+                        src={locationImgs[location.id.replace('-', '')]}
+                        alt={location.shortName + ' restaurant'}
+                        className="w-full h-56 object-cover"
+                      />
+                    </div>
+                  )}
                 </article>
               ))}
             </div>
