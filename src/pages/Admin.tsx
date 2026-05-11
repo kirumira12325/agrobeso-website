@@ -724,6 +724,7 @@ export default function Admin() {
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [imgMsg, setImgMsg] = useState("");
   const [loadingImgs, setLoadingImgs] = useState(false);
+  const [assigningImg, setAssigningImg] = useState<string | null>(null);
   const [filterCat, setFilterCat] = useState("all");
   const [dishImages, setDishImages] = useState<Record<string,string>>({});
   const [dishUploading, setDishUploading] = useState<Record<string,boolean>>({});
@@ -922,6 +923,24 @@ export default function Admin() {
     if (!confirm("Delete this image?")) return;
     const { error } = await supabase.storage.from("images").remove([name]);
     if (!error) await loadImages(); else alert("Delete failed: " + error.message);
+  };
+
+  const handleAssignImage = async (img: UploadedImage, newCat: string) => {
+    if (newCat === img.category) return;
+    setAssigningImg(img.name);
+    try {
+      const { data: blob, error: dlErr } = await supabase.storage.from("images").download(img.name);
+      if (dlErr || !blob) { setImgMsg("Assign failed: could not fetch image."); return; }
+      const nameParts = img.name.split("-").slice(1).join("-") || img.name;
+      const newName = newCat + "-" + Date.now() + "-" + nameParts;
+      const { error: upErr } = await supabase.storage.from("images").upload(newName, blob, { upsert: true });
+      if (upErr) { setImgMsg("Assign failed: " + upErr.message); return; }
+      setImgMsg(`✓ Copied to "${newCat}" category!`);
+      setTimeout(() => setImgMsg(""), 3000);
+      await loadImages();
+    } finally {
+      setAssigningImg(null);
+    }
   };
 
   const handleDishImgUpload = async (dish: Dish, file: File) => {
@@ -1312,6 +1331,19 @@ export default function Admin() {
                         <img src={img.url} alt={img.name} style={{ width: "100%", height: "115px", objectFit: "cover", display: "block" }} />
                         <div style={{ padding: "0.5rem 0.6rem" }}>
                           <div style={{ fontSize: "0.65rem", color: "#b04a2a", fontWeight: 700, textTransform: "uppercase", marginBottom: "0.3rem" }}>{img.category}</div>
+                          <div style={{ marginBottom: "0.3rem" }}>
+                            <select
+                              value=""
+                              disabled={assigningImg === img.name}
+                              onChange={e => { if (e.target.value) handleAssignImage(img, e.target.value); }}
+                              style={{ width: "100%", fontSize: "0.65rem", padding: "0.22rem 0.3rem", border: "1.5px solid #e0d8d0", borderRadius: "4px", background: "white", color: "#555", cursor: "pointer" }}
+                            >
+                              <option value="" disabled>{assigningImg === img.name ? "Copying…" : "＋ Copy to category…"}</option>
+                              {["gallery","hero","menu","about","event","general","dishes"].filter(c => c !== img.category).map(c => (
+                                <option key={c} value={c}>{c}</option>
+                              ))}
+                            </select>
+                          </div>
                           <div style={{ display: "flex", gap: "0.3rem" }}>
                             <button onClick={() => { navigator.clipboard.writeText(img.url).catch(() => {}); setImgMsg("URL copied!"); setTimeout(() => setImgMsg(""), 2000); }} style={{ flex: 1, padding: "0.28rem", background: "#2d1f14", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "0.65rem" }}>Copy URL</button>
                             <button onClick={() => handleDeleteImage(img.name)} style={{ flex: 1, padding: "0.28rem", background: "#dc2626", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "0.65rem" }}>Delete</button>
