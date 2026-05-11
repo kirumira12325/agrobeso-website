@@ -49,9 +49,9 @@ body {
     line-height: 0.95;
 }
 
-  .dek {
-        @apply font-display text-xl italic text-brand-cocoa/70;
-    }
+.dek {
+    @apply font-display text-xl italic text-brand-cocoa/70;
+}
 
 /* ---------- Buttons (overrides for legacy callsites) ---------- */
 .primary-btn {
@@ -73,9 +73,9 @@ body {
 /* ---------- Decorative ---------- */
 .hero-pattern {
     background:
-          radial-gradient(circle at 78% 12%, rgba(212, 165, 116, 0.18), transparent 55%),
-          radial-gradient(circle at 8% 88%, rgba(184, 89, 58, 0.12), transparent 50%),
-          #F4EFE6;
+        radial-gradient(circle at 78% 12%, rgba(212, 165, 116, 0.18), transparent 55%),
+        radial-gradient(circle at 8% 88%, rgba(184, 89, 58, 0.12), transparent 50%),
+        #F4EFE6;
 }
 
 .rule {
@@ -97,15 +97,13 @@ body {
         @apply gap-8 py-10;
         grid-template-columns: 160px 1fr auto;
     }
-        .dish__img { order: 0; }
-        .dish > div { order: 0; }
 }
 
 .dish:last-child {
     @apply border-b;
 }
 
-/* Dish image — responsive: full width on mobile, fixed 160px on >=sm */
+/* Dish image — full width on mobile/tablet, fixed 160px on desktop */
 .dish__img {
     width: 100%;
     max-width: 100%;
@@ -114,14 +112,18 @@ body {
     border-radius: 8px;
     cursor: pointer;
     display: block;
-        order: 2;
     transition: width 0.3s ease, height 0.3s ease;
 }
 
-    /* Text above image on mobile/tablet */
-    .dish > div {
-            order: 1;
+/* On mobile/tablet (< 1024px): text appears above image */
+@media (max-width: 1023px) {
+    .dish__img {
+        order: 2;
     }
+    .dish > div {
+        order: 1;
+    }
+}
 
 @media (min-width: 1024px) {
     .dish__img {
@@ -167,15 +169,15 @@ body {
 /* ---------- Image placeholder (no images yet) ---------- */
 .canvas-img {
     background:
-          radial-gradient(circle at 30% 30%, rgba(212, 165, 116, 0.45), transparent 60%),
-          radial-gradient(circle at 70% 70%, rgba(184, 89, 58, 0.35), transparent 55%),
-          linear-gradient(135deg, #EBE3D4 0%, #D4A574 100%);
+        radial-gradient(circle at 30% 30%, rgba(212, 165, 116, 0.45), transparent 60%),
+        radial-gradient(circle at 70% 70%, rgba(184, 89, 58, 0.35), transparent 55%),
+        linear-gradient(135deg, #EBE3D4 0%, #D4A574 100%);
 }
 
 .canvas-img-dark {
     background:
-          radial-gradient(circle at 25% 20%, rgba(212, 165, 116, 0.35), transparent 50%),
-          linear-gradient(160deg, #2A1810 0%, #3B5D43 60%, #B8593A 100%);
+        radial-gradient(circle at 25% 20%, rgba(212, 165, 116, 0.35), transparent 50%),
+        linear-gradient(160deg, #2A1810 0%, #3B5D43 60%, #B8593A 100%);
 }
 
 /* ---------- Reveal animation ---------- */
@@ -187,4 +189,3 @@ body {
     from { opacity: 0; transform: translateY(24px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-  
