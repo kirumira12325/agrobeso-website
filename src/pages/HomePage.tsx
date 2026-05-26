@@ -420,54 +420,16 @@ export const HomePage = () => {
                 <p className="mt-6 max-w-md font-display text-lg italic text-brand-cocoa/65">{<span style={hStyle(c, 'menu_subtext')}>{c.menu_subtext}</span>}</p>
               </div>
             </div>
-            <div className="mt-24 grid grid-cols-1 gap-x-16 lg:grid-cols-12">
-              <div className="lg:col-span-12">
-                {signatureDishes.map((dish, i) => {
-                  const key = dishKeyMap[dish];
-                  const slug = dishSlugMap[dish];
-                  const story = key ? (c[key + '_story'] || 'Made with care.') : 'Made with care.';
-                  const note = key ? (c[key + '_note'] || 'House favourite') : 'House favourite';
-                  const imgUrl = slug ? dishImgs[slug] : undefined;
-                  return (
-                    <article key={dish} className="dish">
-                      {imgUrl ? (
-                        <img
-                          src={imgUrl}
-                          alt={dish}
-                          className="dish__img"
-                          title={minimizedImgs.has(i) ? 'Click to expand' : 'Click to minimise'}
-                          onClick={() => {
-                            const next = new Set(minimizedImgs);
-                            if (next.has(i)) next.delete(i); else next.add(i);
-                            setMinimizedImgs(next);
-                          }}
-                          data-minimized={minimizedImgs.has(i) ? 'true' : 'false'}
-                        />
-                      ) : (
-                        <div className="dish__img-placeholder" />
-                      )}
-                      <div>
-                        <span className="dish__no">{String(i + 1).padStart(2, '0')}</span>
-                        <h3 className="dish__name">{dish}</h3>
-                        <p className="dish__desc">{story}</p>
-                        <span className="dish__origin">— {note}</span>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="mt-32 border-t border-brand-cocoa/15 pt-16">
-              {menuCategories.length > 0 ? (
+                          {menuCategories.length > 0 ? (
                 <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                   {menuCategories.map((group) => (
-                    <div key={group.id} className="rounded-lg border border-brand-cocoa/10 bg-brand-shell p-6 overflow-hidden relative" style={(() => { const imgMap: Record<string,string> = { 'main-1': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-jollof_rice-1778448765053.png', 'main-2': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-waakye-1778448776454.png', 'main-3': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-kenkey_fish-1778448785122.png', 'main-4': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-fufu-1778449502204.png', 'soups': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-peanut_soup-1778448803115.png', 'extras': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-banku_okra-1778448793996.png', 'snacks': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-fried_fish-1778448811703.png' }; const img = imgMap[group.id]; return img ? { backgroundImage: 'url(' + img + ')', backgroundSize: 'cover', backgroundPosition: 'center' } : {}; })()}>
+                    <div key={group.id} className="rounded-lg border border-brand-cocoa/10 bg-brand-shell p-6 overflow-hidden relative" style={(() => { const imgMap: Record<string,string> = { 'main-1': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-jollof_rice-1778448765053.png', 'main-2': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-waakye-1778448776454.png', 'main-3': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-kenkey_fish-1778448785122.png', 'main-4': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-fufu-1778449502204.png', 'soups': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-peanut_soup-1778448803115.png', 'extras': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-banku_okra-1778448793996.png', 'snacks': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-fried_fish-1778449520771.png' }; const img = imgMap[group.id]; return img ? { backgroundImage: 'url(' + img + ')', backgroundSize: 'cover', backgroundPosition: 'center' } : {}; })()}>
               {['main-1','main-2','main-3','main-4','soups','extras','snacks'].includes(group.id) && <div className="absolute inset-0" style={{ background: 'rgba(245,241,234,0.88)' }} />}
                     <div className="relative z-10">
                       <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                         <p className="eyebrow text-sm font-bold tracking-wide">{group.title}</p>
                         {group.priceNote && (
-                          <span className="inline-block rounded bg-brand-clay/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-brand-clay">
+                          <span className="inline-block rounded bg-brand-clay/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-brand-clay font-bold">
                             {group.priceNote}
                           </span>
                         )}
@@ -496,7 +458,7 @@ export const HomePage = () => {
                     <div key={g.title} className="rounded-lg border border-brand-cocoa/10 bg-brand-shell p-6">
                       <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                         <p className="eyebrow text-sm">{g.title}</p>
-                        <span className="inline-block rounded bg-brand-clay/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-brand-clay">{g.note}</span>
+                        <span className="inline-block rounded bg-brand-clay/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-brand-clay font-bold">{g.note}</span>
                       </div>
                       <ul className="mt-2 space-y-1.5">
                         {g.items.map((item) => (
