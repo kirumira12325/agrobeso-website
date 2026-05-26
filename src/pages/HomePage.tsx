@@ -461,7 +461,9 @@ export const HomePage = () => {
               {menuCategories.length > 0 ? (
                 <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                   {menuCategories.map((group) => (
-                    <div key={group.id} className="rounded-lg border border-brand-cocoa/10 bg-brand-shell p-6">
+                    <div key={group.id} className="rounded-lg border border-brand-cocoa/10 bg-brand-shell p-6 overflow-hidden relative" style={group.id === 'main-1' ? { backgroundImage: 'url(https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-jollof_rice-1778448765053.png)', backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
+                    {group.id === 'main-1' && <div className="absolute inset-0" style={{ background: 'rgba(245,241,234,0.88)' }} />}
+                    <div className="relative z-10">
                       <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                         <p className="eyebrow text-sm font-bold tracking-wide">{group.title}</p>
                         {group.priceNote && (
@@ -480,6 +482,7 @@ export const HomePage = () => {
                           </li>
                         ))}
                       </ul>
+                    </div>
                     </div>
                   ))}
                 </div>
