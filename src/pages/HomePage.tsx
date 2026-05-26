@@ -463,17 +463,17 @@ export const HomePage = () => {
                   {menuCategories.map((group) => (
                     <div key={group.id} className="rounded-lg border border-brand-cocoa/10 bg-brand-shell p-6">
                       <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
-                        <p className="eyebrow text-sm">{group.title}</p>
+                        <p className="eyebrow text-sm font-bold tracking-wide">{group.title}</p>
                         {group.priceNote && (
                           <span className="inline-block rounded bg-brand-clay/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-brand-clay">
                             {group.priceNote}
                           </span>
                         )}
                       </div>
-                      <ul className="mt-2 space-y-1.5">
+                      <ul className="mt-2 space-y-1.5 list-none">
                         {group.items.map((item, idx) => (
                           <li key={idx} className="flex items-baseline justify-between gap-2 font-display text-[15px] text-brand-cocoa/80">
-                            <span>{item.name}</span>
+                            <span className="flex items-baseline gap-1.5"><span className="text-brand-clay font-bold text-base leading-none">•</span><span>{item.name}</span></span>
                             {item.price && (
                               <span className="shrink-0 font-mono text-[12px] text-brand-clay">{item.price}</span>
                             )}
