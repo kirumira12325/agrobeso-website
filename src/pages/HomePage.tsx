@@ -1,6 +1,6 @@
 import { useState, useEffect, CSSProperties } from 'react';
 import { buildMapUrl, buildRestaurantSchema } from '@/lib/schema';
-import { signatureDishes, menuGroups } from '@/data/restaurant';
+import { signatureDishes } from '@/data/restaurant';
 import { agrobesoSupabase as supabase } from '../integrations/supabase/agrobeso-client';
 
 const STORAGE_URL = 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images';
@@ -150,6 +150,12 @@ export const HomePage = () => {
   const [heroSlideIdx, setHeroSlideIdx] = useState(0);
   const [heroFading, setHeroFading] = useState(false);
   const [heroSlideshowSlugs, setHeroSlideshowSlugs] = useState<string[]>([]);
+  const [menuCategories, setMenuCategories] = useState<Array<{
+    id: string;
+    title: string;
+    priceNote: string | null;
+    items: Array<{ name: string; price?: string }>;
+  }>>([]);
 
   useEffect(() => {
     supabase
@@ -234,6 +240,19 @@ export const HomePage = () => {
     setHeroSlideshow(slides);
     setHeroSlideIdx(0);
   }, [dishImgs, heroSlideshowSlugs]);
+
+  useEffect(() => {
+    supabase
+      .from('site_content')
+      .select('id, value')
+      .eq('id', 'menu_full__categories')
+      .single()
+      .then(({ data }) => {
+        if (data && data.value) {
+          try { setMenuCategories(JSON.parse(data.value)); } catch(e) {}
+        }
+      });
+  }, []);
 
   // Auto-advance timer
   useEffect(() => {
@@ -438,15 +457,53 @@ export const HomePage = () => {
                 })}
               </div>
             </div>
-            <div className="mt-32 grid grid-cols-1 gap-12 border-t border-brand-cocoa/15 pt-16 md:grid-cols-3">
-              {menuGroups.map((group) => (
-                <div key={group.title}>
-                  <p className="eyebrow">{group.title}</p>
-                  <ul className="mt-4 space-y-2 font-display text-lg text-brand-cocoa/80">
-                    {group.items.map((item) => (<li key={item}>{item}</li>))}
-                  </ul>
+            <div className="mt-32 border-t border-brand-cocoa/15 pt-16">
+              {menuCategories.length > 0 ? (
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                  {menuCategories.map((group) => (
+                    <div key={group.id} className="rounded-lg border border-brand-cocoa/10 bg-brand-shell p-6">
+                      <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                        <p className="eyebrow text-sm">{group.title}</p>
+                        {group.priceNote && (
+                          <span className="inline-block rounded bg-brand-clay/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-brand-clay">
+                            {group.priceNote}
+                          </span>
+                        )}
+                      </div>
+                      <ul className="mt-2 space-y-1.5">
+                        {group.items.map((item, idx) => (
+                          <li key={idx} className="flex items-baseline justify-between gap-2 font-display text-[15px] text-brand-cocoa/80">
+                            <span>{item.name}</span>
+                            {item.price && (
+                              <span className="shrink-0 font-mono text-[12px] text-brand-clay">{item.price}</span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                  {[
+                    { title: 'Main Dishes', note: 'Take Away £15 / Eat-In £17', items: ['Banku & Soup', 'Fufu & Soup', 'Jollof & Goat Meat'] },
+                    { title: 'Soups', note: '£12.00', items: ['Light Soup', 'Palm Soup', 'Peanut Soup'] },
+                    { title: 'Extras & Snacks', note: 'From £2.00', items: ['Fried Plantain', 'Kenkey', 'Pies'] },
+                  ].map((g) => (
+                    <div key={g.title} className="rounded-lg border border-brand-cocoa/10 bg-brand-shell p-6">
+                      <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                        <p className="eyebrow text-sm">{g.title}</p>
+                        <span className="inline-block rounded bg-brand-clay/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-brand-clay">{g.note}</span>
+                      </div>
+                      <ul className="mt-2 space-y-1.5">
+                        {g.items.map((item) => (
+                          <li key={item} className="font-display text-[15px] text-brand-cocoa/80">{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <p className="mt-16 max-w-lg font-display text-sm italic text-brand-cocoa/55">{<span style={hStyle(c, 'menu_footer_note')}>{c.menu_footer_note}</span>}</p>
           </div>
