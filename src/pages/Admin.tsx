@@ -760,6 +760,16 @@ export default function Admin() {
   const [newDish, setNewDish] = useState<Dish>({ key: "", name: "", story: "", note: "" });
   const [dishSaveMsg, setDishSaveMsg] = useState("");
 
+  const [menuCats, setMenuCats] = useState<Array<{id:string;title:string;priceNote:string;items:Array<{name:string;price:string}>}>>([]);
+  const [menuLoaded, setMenuLoaded] = useState(false);
+  const [menuSaving, setMenuSaving] = useState(false);
+  const [menuSaveMsg, setMenuSaveMsg] = useState('');
+  const [editingCatIdx, setEditingCatIdx] = useState<number|null>(null);
+  const [newCatTitle, setNewCatTitle] = useState('');
+  const [newCatPriceNote, setNewCatPriceNote] = useState('');
+  const [newItemName, setNewItemName] = useState('');
+  const [newItemPrice, setNewItemPrice] = useState('');
+  const [addItemCatIdx, setAddItemCatIdx] = useState<number|null>(null);
   // ── Sections state ──
   const [sectionPreview, setSectionPreview] = useState<SectionTemplate|null>(null);
   const [sectionContent, setSectionContent] = useState<Record<string, Record<string,string>>>({});
@@ -1139,6 +1149,7 @@ export default function Admin() {
     { id: "content", icon: "✏️", label: "Content" },
     { id: "images", icon: "🖼️", label: "Images" },
     { id: "dishes", icon: "🍽️", label: "Dishes" },
+    { id: "menu-manager", icon: "📋", label: "Menu Manager" },
     { id: "design", icon: "🎨", label: "Design Studio" },
     { id: "sections", icon: "➕", label: "Sections" },
     { id: "settings", icon: "⚙️", label: "Settings" },
@@ -1546,6 +1557,114 @@ export default function Admin() {
                 ))}
               </div>
             )}
+
+            {/* ═══ MENU MANAGER TAB ════════════════════════════════════ */}
+            {tab === "menu-manager" && (() => {
+              // Load on mount
+              if (!menuLoaded) {
+                supabase.from("site_content").select("id,value").eq("id","menu_full__categories").single().then(({data})=>{
+                  if(data?.value){try{setMenuCats(JSON.parse(data.value));}catch(e){}}
+                  setMenuLoaded(true);
+                });
+              }
+              const saveMenu = async(cats:typeof menuCats)=>{
+                setMenuSaving(true);
+                await supabase.from("site_content").upsert({id:"menu_full__categories",value:JSON.stringify(cats),updated_at:new Date().toISOString()},{onConflict:"id"});
+                setMenuSaving(false);
+                setMenuSaveMsg("Saved!"); setTimeout(()=>setMenuSaveMsg(""),2500);
+              };
+              return (
+                <div style={{padding:"2rem",maxWidth:"900px"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem",flexWrap:"wrap",gap:"0.75rem"}}>
+                    <div>
+                      <h2 style={S.h2}>Menu Manager</h2>
+                      <p style={S.hint}>Add, edit and reorder menu categories and items. Changes appear live on the website.</p>
+                    </div>
+                    <div style={{display:"flex",gap:"0.5rem",alignItems:"center"}}>
+                      {menuSaveMsg && <span style={{color:"#4caf50",fontWeight:600,fontSize:"0.82rem"}}>{menuSaveMsg}</span>}
+                      <button onClick={()=>saveMenu(menuCats)} style={S.btnPrimary} disabled={menuSaving}>{menuSaving?"Saving...":"Save All Changes"}</button>
+                    </div>
+                  </div>
+
+                  {/* Add new category */}
+                  <div style={{background:"#f8f5f0",border:"1px solid #e0d8cc",borderRadius:"8px",padding:"1rem",marginBottom:"1.5rem"}}>
+                    <p style={{fontWeight:600,marginBottom:"0.75rem",fontSize:"0.85rem"}}>+ Add New Category</p>
+                    <div style={{display:"flex",gap:"0.5rem",flexWrap:"wrap"}}>
+                      <input value={newCatTitle} onChange={(e:any)=>setNewCatTitle(e.target.value)} placeholder="Category title (e.g. Main Dishes — Group 1)" style={{...S.input,flex:"2",minWidth:"200px"}} />
+                      <input value={newCatPriceNote} onChange={(e:any)=>setNewCatPriceNote(e.target.value)} placeholder="Price note (e.g. Take Away £15 / Eat-In £17)" style={{...S.input,flex:"2",minWidth:"160px"}} />
+                      <button onClick={()=>{
+                        if(!newCatTitle.trim())return;
+                        const updated=[...menuCats,{id:Date.now().toString(),title:newCatTitle.trim(),priceNote:newCatPriceNote.trim(),items:[]}];
+                        setMenuCats(updated);setNewCatTitle("");setNewCatPriceNote("");
+                      }} style={S.btnPrimary}>Add Category</button>
+                    </div>
+                  </div>
+
+                  {/* Categories list */}
+                  {menuCats.map((cat,ci)=>(
+                    <div key={cat.id} style={{background:"#fff",border:"1px solid #e0d8cc",borderRadius:"8px",marginBottom:"1rem",overflow:"hidden"}}>
+                      {/* Category header */}
+                      <div style={{background:"#f8f5f0",padding:"0.75rem 1rem",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"0.5rem",flexWrap:"wrap"}}>
+                        {editingCatIdx===ci ? (
+                          <div style={{display:"flex",gap:"0.5rem",flex:1,flexWrap:"wrap"}}>
+                            <input defaultValue={cat.title} id={"ct_"+ci} style={{...S.input,flex:"2"}} />
+                            <input defaultValue={cat.priceNote} id={"cp_"+ci} style={{...S.input,flex:"2"}} />
+                            <button onClick={()=>{
+                              const t=(document.getElementById("ct_"+ci) as HTMLInputElement)?.value||cat.title;
+                              const p=(document.getElementById("cp_"+ci) as HTMLInputElement)?.value||"";
+                              const updated=menuCats.map((c,i)=>i===ci?{...c,title:t,priceNote:p}:c);
+                              setMenuCats(updated);setEditingCatIdx(null);
+                            }} style={S.btnPrimary}>Save</button>
+                            <button onClick={()=>setEditingCatIdx(null)} style={S.btn}>Cancel</button>
+                          </div>
+                        ) : (
+                          <>
+                            <div>
+                              <span style={{fontWeight:700,fontSize:"0.9rem"}}>{cat.title}</span>
+                              {cat.priceNote && <span style={{marginLeft:"0.75rem",background:"#c8622a22",color:"#c8622a",borderRadius:"4px",padding:"0.1rem 0.5rem",fontSize:"0.75rem",fontWeight:600}}>{cat.priceNote}</span>}
+                            </div>
+                            <div style={{display:"flex",gap:"0.4rem"}}>
+                              {ci>0&&<button onClick={()=>{const u=[...menuCats];[u[ci-1],u[ci]]=[u[ci],u[ci-1]];setMenuCats(u);}} style={S.btn}>↑</button>}
+                              {ci<menuCats.length-1&&<button onClick={()=>{const u=[...menuCats];[u[ci],u[ci+1]]=[u[ci+1],u[ci]];setMenuCats(u);}} style={S.btn}>↓</button>}
+                              <button onClick={()=>setEditingCatIdx(ci)} style={S.btn}>✏️ Edit</button>
+                              <button onClick={()=>{if(confirm("Remove this category and all its items?"))setMenuCats(menuCats.filter((_,i)=>i!==ci));}} style={{...S.btn,color:"#c0392b"}}>🗑</button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Items list */}
+                      <div style={{padding:"0.75rem 1rem"}}>
+                        {cat.items.map((item,ii)=>(
+                          <div key={ii} style={{display:"flex",alignItems:"center",gap:"0.5rem",padding:"0.3rem 0",borderBottom:"1px solid #f0ebe3"}}>
+                            <span style={{flex:1,fontSize:"0.88rem"}}>{item.name}</span>
+                            {item.price&&<span style={{color:"#c8622a",fontWeight:600,fontSize:"0.82rem",minWidth:"50px",textAlign:"right"}}>{item.price}</span>}
+                            <button onClick={()=>{const u={...cat,items:cat.items.filter((_,i)=>i!==ii)};const cats=[...menuCats];cats[ci]=u;setMenuCats(cats);}} style={{...S.btn,padding:"0.15rem 0.4rem",fontSize:"0.75rem",color:"#c0392b"}}>✕</button>
+                          </div>
+                        ))}
+                        {/* Add item row */}
+                        {addItemCatIdx===ci ? (
+                          <div style={{display:"flex",gap:"0.5rem",marginTop:"0.5rem",flexWrap:"wrap"}}>
+                            <input value={newItemName} onChange={(e:any)=>setNewItemName(e.target.value)} placeholder="Item name" style={{...S.input,flex:"3",minWidth:"140px"}} />
+                            <input value={newItemPrice} onChange={(e:any)=>setNewItemPrice(e.target.value)} placeholder="Price (optional)" style={{...S.input,flex:"1",minWidth:"100px"}} />
+                            <button onClick={()=>{
+                              if(!newItemName.trim())return;
+                              const item={name:newItemName.trim(),price:newItemPrice.trim()};
+                              const u={...cat,items:[...cat.items,item]};const cats=[...menuCats];cats[ci]=u;
+                              setMenuCats(cats);setNewItemName("");setNewItemPrice("");setAddItemCatIdx(null);
+                            }} style={S.btnPrimary}>Add</button>
+                            <button onClick={()=>setAddItemCatIdx(null)} style={S.btn}>Cancel</button>
+                          </div>
+                        ) : (
+                          <button onClick={()=>setAddItemCatIdx(ci)} style={{...S.btn,marginTop:"0.5rem",fontSize:"0.8rem"}}>+ Add Item</button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {menuCats.length===0&&<p style={{color:"#999",fontStyle:"italic",textAlign:"center",padding:"2rem 0"}}>No categories yet. Add your first category above.</p>}
+                </div>
+              );
+            })()}
 
             {/* ═══ SECTIONS TAB ════════════════════════════════════════════════ */}
             {tab === "sections" && (
