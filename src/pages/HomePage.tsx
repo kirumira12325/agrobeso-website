@@ -1,6 +1,5 @@
 import { useState, useEffect, CSSProperties } from 'react';
 import { buildMapUrl, buildRestaurantSchema } from '@/lib/schema';
-import { signatureDishes } from '@/data/restaurant';
 import { agrobesoSupabase as supabase } from '../integrations/supabase/agrobeso-client';
 
 const STORAGE_URL = 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images';
@@ -103,28 +102,7 @@ const defaultContent: Record<string, string> = {
   instagram_url: '#',
 };
 
-const dishKeyMap: Record<string, string> = {
-  'Jollof Rice': 'dish_jollof_rice',
-  'Waakye': 'dish_waakye',
-  'Kenkey & Fish': 'dish_kenkey_fish',
-  'Banku & Okra Stew': 'dish_banku_okra',
-  'Peanut Soup': 'dish_peanut_soup',
-  'Fufu / Pounded Yam': 'dish_fufu',
-  'Fried Fish / Tilapia': 'dish_fried_fish',
-  'Tuo Zaafi': 'dish_tuo_zaafi',
-};
 
-// Map dish name to slug for image lookup
-const dishSlugMap: Record<string, string> = {
-  'Jollof Rice': 'jollof_rice',
-  'Waakye': 'waakye',
-  'Kenkey & Fish': 'kenkey_fish',
-  'Banku & Okra Stew': 'banku_okra',
-  'Peanut Soup': 'peanut_soup',
-  'Fufu / Pounded Yam': 'fufu',
-  'Fried Fish / Tilapia': 'fried_fish',
-  'Tuo Zaafi': 'tuo_zaafi',
-};
 
 // Reverse map: slug → display name
 const slugToName: Record<string, string> = {
@@ -433,7 +411,7 @@ export const HomePage = () => {
                           {menuCategories.length > 0 ? (
                 <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                   {menuCategories.map((group) => (
-                    <div key={group.id} className="rounded-lg border border-brand-cocoa/10 bg-brand-shell p-6 overflow-hidden relative" style={MENU_CARD_IMAGES[group.id] ? { backgroundImage: 'url(' + MENU_CARD_IMAGES[group.id] + ')', backgroundSize: 'cover', backgroundPosition: 'center' } : {}}}>
+                    <div key={group.id} className="rounded-lg border border-brand-cocoa/10 bg-brand-shell p-6 overflow-hidden relative" style={MENU_CARD_IMAGES[group.id] ? { backgroundImage: 'url(' + MENU_CARD_IMAGES[group.id] + ')', backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
               {!!MENU_CARD_IMAGES[group.id] && <div className="absolute inset-0" style={{ background: 'rgba(245,241,234,0.88)' }} />}
                     <div className="relative z-10">
                       <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
