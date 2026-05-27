@@ -304,7 +304,7 @@ export const HomePage = () => {
         <section className="hero-pattern relative overflow-hidden">
           <div className="section-shell grid min-h-[88vh] grid-cols-1 items-center gap-16 py-24 lg:grid-cols-12 lg:gap-8">
             <div className="lg:col-span-7 reveal">
-              <p className="eyebrow mb-10">— {<span style={hStyle(c, 'hero_tagline')}>{c.hero_tagline}</span>}</p>
+              <p className="eyebrow mb-10 !whitespace-normal">— {<span style={hStyle(c, 'hero_tagline')}>{c.hero_tagline}</span>}</p>
               <h1 className="display text-[clamp(56px,9vw,144px)]" style={hStyle(c, 'hero_headline_line1')}>
                 {<span style={hStyle(c, 'hero_headline_line1')}>{c.hero_headline_line1}</span>}<br />{<span style={hStyle(c, 'hero_headline_line2')}>{c.hero_headline_line2}</span>}<br />
                 <em className="font-display italic text-brand-clay">{<span style={hStyle(c, 'hero_headline_italic')}>{c.hero_headline_italic}</span>}</em>
