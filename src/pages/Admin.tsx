@@ -707,7 +707,7 @@ function LivePreviewPanel({ content, isOpen, onToggle, activeAnchor }: { content
 }
 
 
-// ─── Reservations Tab Component ──────────────────────────────────────────────
+// ===================== Reservations Tab Component ======================
 const RESV_URL = 'https://kbopqzhfckbhkumiinmk.supabase.co/rest/v1/reservations';
 const RESV_HEADERS = {
   'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtib3BxemhmY2tiaGt1bWlpbm1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4Nzc3ODAsImV4cCI6MjA5MzQ1Mzc4MH0.fklxNFN7hzi8mzIWCfUva4qBK_-ROKn-HGCoFscoA5w',
@@ -1300,8 +1300,10 @@ export default function Admin() {
     { id: "settings", icon: "⚙️", label: "Settings" },
     { id: "help", icon: "💡", label: "Help & Tips" },
     { id: "preview", icon: "👁️", label: "Preview" },
-      { id: "reservations", icon: "📅", label: "Reservations" },
-─────────────────────
+    { id: "reservations", icon: "📅", label: "Reservations" },
+  ];
+
+
   if (tab === "preview") {
     return (
       <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", zIndex: 9999, display: "flex", flexDirection: "column", background: "#111" }}>
