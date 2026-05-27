@@ -137,6 +137,16 @@ const slugToName: Record<string, string> = {
   fried_fish: 'Fried Fish / Tilapia',
   tuo_zaafi: 'Tuo Zaafi',
 };
+const MENU_CARD_IMAGES: Record<string, string> = {
+  'main-1': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-jollof_rice-1778448765053.png',
+  'main-2': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-waakye-1778448776454.png',
+  'main-3': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-kenkey_fish-1778448785122.png',
+  'main-4': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-fufu-1778449502204.png',
+  'soups': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-peanut_soup-1778448803115.png',
+  'extras': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-banku_okra-1778448793996.png',
+  'snacks': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-fried_fish-1778449520771.png',
+};
+
 
 export const HomePage = () => {
   const schema = buildRestaurantSchema();
@@ -423,8 +433,8 @@ export const HomePage = () => {
                           {menuCategories.length > 0 ? (
                 <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                   {menuCategories.map((group) => (
-                    <div key={group.id} className="rounded-lg border border-brand-cocoa/10 bg-brand-shell p-6 overflow-hidden relative" style={(() => { const imgMap: Record<string,string> = { 'main-1': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-jollof_rice-1778448765053.png', 'main-2': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-waakye-1778448776454.png', 'main-3': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-kenkey_fish-1778448785122.png', 'main-4': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-fufu-1778449502204.png', 'soups': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-peanut_soup-1778448803115.png', 'extras': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-banku_okra-1778448793996.png', 'snacks': 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images/dish-fried_fish-1778449520771.png' }; const img = imgMap[group.id]; return img ? { backgroundImage: 'url(' + img + ')', backgroundSize: 'cover', backgroundPosition: 'center' } : {}; })()}>
-              {['main-1','main-2','main-3','main-4','soups','extras','snacks'].includes(group.id) && <div className="absolute inset-0" style={{ background: 'rgba(245,241,234,0.88)' }} />}
+                    <div key={group.id} className="rounded-lg border border-brand-cocoa/10 bg-brand-shell p-6 overflow-hidden relative" style={MENU_CARD_IMAGES[group.id] ? { backgroundImage: 'url(' + MENU_CARD_IMAGES[group.id] + ')', backgroundSize: 'cover', backgroundPosition: 'center' } : {}}}>
+              {!!MENU_CARD_IMAGES[group.id] && <div className="absolute inset-0" style={{ background: 'rgba(245,241,234,0.88)' }} />}
                     <div className="relative z-10">
                       <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                         <p className="eyebrow text-sm font-bold tracking-wide">{group.title}</p>
