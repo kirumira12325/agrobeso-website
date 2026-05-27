@@ -9,7 +9,7 @@ const navItems = [
   { label: 'Locations', href: '#locations' },
   { label: 'Heritage', href: '#about' },
   { label: 'Gallery', href: '#gallery' },
-  { label: 'Reserve', href: '#ordering' },
+  { label: 'Reserve', href: '/reserve' },
 ];
 
 // Typography helpers — read font/size overrides from content (admin-controlled)
@@ -293,7 +293,7 @@ export const HomePage = () => {
               <a key={item.label} href={item.href} className="transition hover:text-brand-clay">{item.label}</a>
             ))}
           </nav>
-          <a href="#ordering" className="hidden font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa md:inline-flex md:items-center md:gap-2 md:border-b md:border-brand-cocoa md:pb-1">
+          <a href="/reserve" className="hidden font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa md:inline-flex md:items-center md:gap-2 md:border-b md:border-brand-cocoa md:pb-1">
             Reserve <span aria-hidden>&rarr;</span>
           </a>
         </div>
@@ -314,7 +314,7 @@ export const HomePage = () => {
                 <a href="#menu" className="font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa">
                   <span className="border-b border-brand-cocoa pb-1">View the menu</span>
                 </a>
-                <a href="#ordering" className="font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60 transition hover:text-brand-clay">Reserve a table &rarr;</a>
+                <a href="/reserve" className="font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa/60 transition hover:text-brand-clay">Reserve a table &rarr;</a>
               </div>
             </div>
             <div className="lg:col-span-5">
@@ -662,7 +662,7 @@ export const HomePage = () => {
           <li><a href="#menu" className="sticky-nav-btn">Menu</a></li>
           <li><a href={thorntonHeath.phoneHref} className="sticky-nav-btn">Call</a></li>
           <li><a href={buildMapUrl(thorntonHeath.mapsQuery)} target="_blank" rel="noreferrer" className="sticky-nav-btn">Map</a></li>
-          <li><a href="#ordering" className="sticky-nav-btn">Reserve</a></li>
+          <li><a href="/reserve" className="sticky-nav-btn">Reserve</a></li>
         </ul>
       </nav>
 
