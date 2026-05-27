@@ -457,7 +457,6 @@ export const HomePage = () => {
                   ))}
                 </div>
               )}
-            </div>
             <p className="mt-16 max-w-lg font-display text-sm italic text-brand-cocoa/55">{<span style={hStyle(c, 'menu_footer_note')}>{c.menu_footer_note}</span>}</p>
           </div>
         </section>
