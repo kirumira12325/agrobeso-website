@@ -706,6 +706,151 @@ function LivePreviewPanel({ content, isOpen, onToggle, activeAnchor }: { content
   );
 }
 
+
+// ─── Reservations Tab Component ──────────────────────────────────────────────
+const RESV_URL = 'https://kbopqzhfckbhkumiinmk.supabase.co/rest/v1/reservations';
+const RESV_HEADERS = {
+  'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtib3BxemhmY2tiaGt1bWlpbm1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4Nzc3ODAsImV4cCI6MjA5MzQ1Mzc4MH0.fklxNFN7hzi8mzIWCfUva4qBK_-ROKn-HGCoFscoA5w',
+  'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtib3BxemhmY2tiaGt1bWlpbm1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4Nzc3ODAsImV4cCI6MjA5MzQ1Mzc4MH0.fklxNFN7hzi8mzIWCfUva4qBK_-ROKn-HGCoFscoA5w',
+  'Content-Type': 'application/json'
+};
+
+type Reservation = {
+  id: string; reference: string; location: string; date: string; time: string;
+  name: string; phone: string; email: string; guests: number; notes: string;
+  status: string; created_at: string;
+};
+
+function ReservationsTab({ supabase: _sb }: { supabase: any }) {
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<string>('all');
+  const [search, setSearch] = useState('');
+  const [updating, setUpdating] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadReservations();
+  }, []);
+
+  async function loadReservations() {
+    setLoading(true);
+    try {
+      const res = await fetch(RESV_URL + '?order=created_at.desc&limit=200', {
+        headers: RESV_HEADERS
+      });
+      if (res.ok) {
+        const data: Reservation[] = await res.json();
+        setReservations(data);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function updateStatus(id: string, status: string) {
+    setUpdating(id);
+    try {
+      await fetch(RESV_URL + '?id=eq.' + id, {
+        method: 'PATCH',
+        headers: { ...RESV_HEADERS, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ status })
+      });
+      setReservations(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+    } finally {
+      setUpdating(null);
+    }
+  }
+
+  const STATUS_COLORS: Record<string,string> = {
+    pending: '#f39c12', confirmed: '#27ae60', cancelled: '#e74c3c', seated: '#2980b9', completed: '#8e44ad'
+  };
+
+  const filtered = reservations.filter(r => {
+    const matchFilter = filter === 'all' || r.status === filter;
+    const q = search.toLowerCase();
+    const matchSearch = !q || r.name.toLowerCase().includes(q) || r.reference.toLowerCase().includes(q) || r.phone.includes(q);
+    return matchFilter && matchSearch;
+  });
+
+  function formatDate(d: string) {
+    if (!d) return d;
+    return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  return (
+    <div style={{ padding: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#2c1810' }}>📅 Reservations</h2>
+        <button onClick={loadReservations} style={{ padding: '0.5rem 1rem', background: '#2c1810', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}>
+          ↻ Refresh
+        </button>
+      </div>
+
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.75rem', marginBottom: '1.5rem' }}>
+        {['pending','confirmed','cancelled','completed'].map(s => (
+          <div key={s} style={{ background: 'white', border: '1px solid #e0d5c5', borderRadius: '8px', padding: '0.75rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: STATUS_COLORS[s] }}>{reservations.filter(r => r.status === s).length}</div>
+            <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b5b45', marginTop: '0.25rem' }}>{s}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+        <input type="text" placeholder="Search by name, reference or phone..." value={search} onChange={e => setSearch(e.target.value)}
+          style={{ flex: 1, minWidth: '200px', padding: '0.5rem 0.75rem', border: '1px solid #d4c5a9', borderRadius: '6px', fontSize: '0.9rem', fontFamily: 'inherit' }} />
+        {['all','pending','confirmed','seated','cancelled','completed'].map(s => (
+          <button key={s} onClick={() => setFilter(s)}
+            style={{ padding: '0.4rem 0.75rem', border: '2px solid ' + (filter === s ? '#2c1810' : '#d4c5a9'), background: filter === s ? '#2c1810' : 'white', color: filter === s ? 'white' : '#5a4a35', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', textTransform: 'capitalize' }}>
+            {s}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <p style={{ color: '#8b7355', textAlign: 'center', padding: '2rem' }}>Loading reservations...</p>
+      ) : filtered.length === 0 ? (
+        <p style={{ color: '#8b7355', textAlign: 'center', padding: '2rem' }}>No reservations found.</p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {filtered.map(r => (
+            <div key={r.id} style={{ background: 'white', border: '1px solid #e0d5c5', borderRadius: '8px', padding: '1rem 1.25rem', display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.5rem 1rem', alignItems: 'start' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '0.4rem' }}>
+                  <strong style={{ fontSize: '1rem', color: '#2c1810' }}>{r.name}</strong>
+                  <span style={{ fontFamily: 'monospace', fontSize: '0.8rem', background: '#f5f1ea', padding: '0.15rem 0.5rem', borderRadius: '4px', color: '#c17d3c', fontWeight: 700 }}>{r.reference}</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: STATUS_COLORS[r.status] || '#666' }}>{r.status}</span>
+                </div>
+                <div style={{ fontSize: '0.85rem', color: '#5a4a35', display: 'flex', flexWrap: 'wrap', gap: '0.25rem 1rem' }}>
+                  <span>📍 {r.location}</span>
+                  <span>📅 {formatDate(r.date)} at {r.time}</span>
+                  <span>👥 {r.guests} {r.guests === 1 ? 'guest' : 'guests'}</span>
+                </div>
+                <div style={{ fontSize: '0.85rem', color: '#5a4a35', marginTop: '0.25rem', display: 'flex', flexWrap: 'wrap', gap: '0.25rem 1rem' }}>
+                  <span>📞 {r.phone}</span>
+                  <span>✉️ {r.email}</span>
+                  {r.notes && <span>💬 {r.notes}</span>}
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '120px' }}>
+                <select value={r.status} disabled={updating === r.id}
+                  onChange={e => updateStatus(r.id, e.target.value)}
+                  style={{ padding: '0.35rem 0.5rem', border: '1px solid #d4c5a9', borderRadius: '5px', fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit', background: 'white' }}>
+                  {['pending','confirmed','seated','cancelled','completed'].map(s => (
+                    <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                  ))}
+                </select>
+                {updating === r.id && <span style={{ fontSize: '0.75rem', color: '#8b7355', textAlign: 'center' }}>Saving...</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Admin component ─────────────────────────────────────────────────────
 export default function Admin() {
   const [authed, setAuthed] = useState(() => sessionStorage.getItem('adminAuthed') === 'true');
@@ -1155,9 +1300,8 @@ export default function Admin() {
     { id: "settings", icon: "⚙️", label: "Settings" },
     { id: "help", icon: "💡", label: "Help & Tips" },
     { id: "preview", icon: "👁️", label: "Preview" },
-  ];
-
-  // ─── Full-screen preview mode ──────────────────────────────────────────────
+      { id: "reservations", icon: "📅", label: "Reservations" },
+─────────────────────
   if (tab === "preview") {
     return (
       <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", zIndex: 9999, display: "flex", flexDirection: "column", background: "#111" }}>
@@ -1899,7 +2043,11 @@ export default function Admin() {
                 ))}
               </div>
             )}
-          </main>
+                      {/* ═══ RESERVATIONS TAB ══════════════════════════════════════════════ */}
+            {tab === "reservations" && (
+              <ReservationsTab supabase={supabase} />
+            )}
+</main>
 
           {/* ── Live Preview Panel (Content tab) ── */}
           {tab === "content" && (
