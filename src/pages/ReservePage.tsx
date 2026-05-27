@@ -122,9 +122,9 @@ export default function ReservePage() {
             <h1 style={{fontSize:'clamp(2rem,6vw,3rem)',fontWeight:400,color:'#2c1810',margin:'0 0 0.5rem',lineHeight:1.1}}>Join us for a meal.</h1>
             <p style={{color:'#6b5b45',marginBottom:'2rem'}}>No payment required — we'll confirm your table by phone.</p>
             <div style={{marginBottom:'2.5rem'}}>
-              <div style={{display:'flex',justifyContent:'space-between',marginBottom:'0.5rem'}}>
+              <div style={{display:'flex',justifyContent:'space-between',gap:'0.25rem',marginBottom:'0.5rem'}}>
                 {['Location','Date & Time','Your Details'].map((label,i)=>(
-                  <span key={label} style={{fontSize:'0.7rem',letterSpacing:'0.1em',textTransform:'uppercase',color:step>i+1?'#c17d3c':step===i+1?'#2c1810':'#9e8870',fontWeight:step===i+1?700:400}}>{label}</span>
+                  <span key={label} style={{fontSize:'0.65rem',letterSpacing:'0.05em',textTransform:'uppercase',flex:1,textAlign:'center',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',color:step>i+1?'#c17d3c':step===i+1?'#2c1810':'#9e8870',fontWeight:step===i+1?700:400}}>{label}</span>
                 ))}
               </div>
               <div style={{height:'3px',background:'#d4c5a9',borderRadius:'2px',overflow:'hidden'}}>
