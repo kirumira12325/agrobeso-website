@@ -428,6 +428,31 @@ export const HomePage = () => {
         }
       });
     }
+
+    // 11. Call dual-location modal handler
+    const callBtn = document.getElementById('agro-call-btn');
+    const callModal = document.getElementById('agro-call-modal');
+    const callCancel = document.getElementById('agro-call-cancel');
+    if (callBtn && callModal) {
+      callBtn.addEventListener('click', () => {
+        callModal.classList.add('open');
+        callModal.style.setProperty('display', 'flex', 'important');
+      });
+    }
+    if (callCancel && callModal) {
+      callCancel.addEventListener('click', () => {
+        callModal.classList.remove('open');
+        callModal.style.display = 'none';
+      });
+    }
+    if (callModal) {
+      callModal.addEventListener('click', (e) => {
+        if (e.target === callModal) {
+          callModal.classList.remove('open');
+          callModal.style.display = 'none';
+        }
+      });
+    }
   }, []);
 
   const peckham = {
@@ -835,7 +860,7 @@ export const HomePage = () => {
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-brand-cocoa/10 bg-brand-bone/95 p-2 backdrop-blur md:hidden">
         <ul className="grid grid-cols-4 gap-2">
           <li><a href="#menu" className="sticky-nav-btn">Menu</a></li>
-          <li><a href={thorntonHeath.phoneHref} className="sticky-nav-btn">Call</a></li>
+          <li><button type="button" id="agro-call-btn" className="sticky-nav-btn w-full" style={{background:'transparent',border:'1px solid rgba(42,26,18,0.15)',cursor:'pointer',fontFamily:'inherit',fontSize:'10px',letterSpacing:'0.1em',textTransform:'uppercase',color:'#2A1810'}}>Call</button></li>
           <li><button type="button" id="agro-maps-btn" className="sticky-nav-btn w-full" style={{background:'transparent',border:'1px solid rgba(42,26,18,0.15)',cursor:'pointer',fontFamily:'inherit',fontSize:'10px',letterSpacing:'0.1em',textTransform:'uppercase',color:'#2A1810'}}>Map</button></li>
           <li><a href="/reserve" className="sticky-nav-btn">Reserve</a></li>
         </ul>
@@ -855,6 +880,25 @@ export const HomePage = () => {
             <span>23 Brigstock Road, CR7 7JJ</span>
           </a>
           <button type="button" id="agro-maps-cancel">Cancel</button>
+        </div>
+      </div>
+
+      {/* CALL DUAL-LOCATION MODAL */}
+      <div id="agro-call-modal" role="dialog" aria-modal="true" aria-label="Call a location">
+        <div id="agro-call-modal-inner">
+          <h3>Call us</h3>
+          <p>Choose which location to call</p>
+          <a href={thorntonHeath.phoneHref} className="agro-call-btn">
+            <strong>Thornton Heath</strong>
+            020 8684 6699
+            <span>23 Brigstock Road, CR7 7JJ</span>
+          </a>
+          <a href={peckham.phoneHref} className="agro-call-btn">
+            <strong>Peckham</strong>
+            {peckham.phoneLabel}
+            <span>139 Peckham High Street, SE15 5SL</span>
+          </a>
+          <button type="button" id="agro-call-cancel">Cancel</button>
         </div>
       </div>
 
