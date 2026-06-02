@@ -20,10 +20,10 @@ const FONT_MAP: Record<string, string> = {
   italic_serif: '"Cormorant Garamond", Georgia, serif',
 };
 const SIZE_MAP: Record<string, string> = {
-  S: 'clamp(24px, 4vw, 48px)',
-  M: 'clamp(36px, 6vw, 80px)',
-  L: 'clamp(56px, 9vw, 130px)',
-  XL: 'clamp(72px, 12vw, 180px)',
+  S: 'clamp(20px, 3vw, 36px)',
+  M: 'clamp(28px, 4.5vw, 60px)',
+  L: 'clamp(36px, 5.5vw, 80px)',
+  XL: 'clamp(42px, 6vw, 90px)',
 };
 const SECTION_KEY_FOR_FIELD: Record<string, string> = {
   hero_tagline: "hero", hero_headline_line1: "hero", hero_headline_line2: "hero", hero_headline_italic: "hero", hero_subheadline: "hero", hero_featured_dish: "hero",
@@ -48,7 +48,7 @@ function hStyle(c: Record<string, string>, baseId: string): CSSProperties {
   const size = s || ss;
   const style: CSSProperties = {};
   if (font && FONT_MAP[font]) style.fontFamily = FONT_MAP[font];
-  if (size && SIZE_MAP[size]) { style.fontSize = SIZE_MAP[size]; style.lineHeight = 1.1; }
+  if (size && SIZE_MAP[size]) { style.fontSize = SIZE_MAP[size]; style.lineHeight = 1.0; }
   return style;
 }
 
