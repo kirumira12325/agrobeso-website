@@ -502,15 +502,15 @@ export const HomePage = () => {
       <main id="top">
         {/* HERO */}
         <section className="hero-pattern relative overflow-hidden">
-          <div className="section-shell grid min-h-[88vh] grid-cols-1 items-center gap-16 py-24 lg:grid-cols-12 lg:gap-8">
+          <div className="section-shell grid grid-cols-1 items-center gap-8 py-12 lg:grid-cols-12 lg:gap-8">
             <div className="lg:col-span-7 reveal">
               <p className="eyebrow mb-10 !whitespace-normal">— {<span style={hStyle(c, 'hero_tagline')}>{c.hero_tagline}</span>}</p>
-              <h1 className="display text-[clamp(56px,9vw,144px)]" style={hStyle(c, 'hero_headline_line1')}>
+              <h1 className="display text-[clamp(36px,5.5vw,88px)]" style={hStyle(c, 'hero_headline_line1')}>
                 {<span style={hStyle(c, 'hero_headline_line1')}>{c.hero_headline_line1}</span>}<br />{<span style={hStyle(c, 'hero_headline_line2')}>{c.hero_headline_line2}</span>}<br />
                 <em className="font-display italic text-brand-clay">{<span style={hStyle(c, 'hero_headline_italic')}>{c.hero_headline_italic}</span>}</em>
               </h1>
-              <p className="mt-12 max-w-md font-display text-xl italic text-brand-cocoa/70">{<span style={hStyle(c, 'hero_subheadline')}>{c.hero_subheadline}</span>}</p>
-              <div className="mt-12 flex flex-wrap items-center gap-8">
+              <p className="mt-6 max-w-md font-display text-xl italic text-brand-cocoa/70">{<span style={hStyle(c, 'hero_subheadline')}>{c.hero_subheadline}</span>}</p>
+              <div className="mt-6 flex flex-wrap items-center gap-8">
                 <a href="#menu" className="font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa">
                   <span className="border-b border-brand-cocoa pb-1">View the menu</span>
                 </a>
