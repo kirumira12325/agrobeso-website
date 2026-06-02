@@ -216,6 +216,10 @@ position: relative !important;
 }
 #about h2, #about h3 { text-shadow: rgba(0,0,0,0.45) 0px 3px 18px !important; }
 #about p { color: rgba(244,239,230,0.85) !important; opacity: 1 !important; }
+/* Heritage eyebrow "— III" — gold on dark background */
+#about .font-mono.uppercase { color: #b4892f !important; }
+/* Heritage badge "HERITAGE" — same white on terracotta as all others */
+#about p.mt-3 { color: #ffffff !important; background: #b83a3a !important; }
 
 /* ── LOCATIONS ── */
 #locations article {
@@ -304,13 +308,10 @@ clip-path: polygon(100% 0, 0 0, 100% 100%) !important; z-index: 5 !important;
 #menu .rounded-lg.border ul { flex: 1 !important; }
 #menu li {
 color: #2a1a12 !important; opacity: 1 !important;
-font-size: 0.835rem !important; font-weight: 500 !important;
-line-height: 1.45 !important; padding: 0.22rem 0 !important;
+font-size: 0.92rem !important; font-weight: 500 !important;
+line-height: 1.5 !important; padding: 0.28rem 0 !important;
 border-bottom: 1px dotted rgba(138,52,23,0.15) !important;
-overflow: hidden !important;
-display: -webkit-box !important;
--webkit-line-clamp: 2 !important;
--webkit-box-orient: vertical !important;
+overflow: visible !important;
 }
 #menu li:last-child { border-bottom: none !important; }
 #menu li * { opacity: 1 !important; }
@@ -333,14 +334,15 @@ box-shadow: rgba(120,85,25,0.45) 0px 0px 0px 1px !important;
 /* ── MENU: section label + card group title colours ── */
 /* Section badge (THE MENU) — white text on terracotta */
 #menu > .section-shell p.mt-3.font-mono.uppercase.tracking-widest2 { color: #ffffff !important; }
-/* Card group titles (MAIN DISHES — GROUP 1 etc) — dark on parchment */
+/* Card group titles (MAIN DISHES — GROUP 1 etc) — dark, bigger on parchment */
 #menu .rounded-lg.border .eyebrow,
 #menu .rounded-lg.border p[class*="uppercase"],
 #menu .rounded-lg.border [class*="eyebrow"] {
 color: #2a1a12 !important;
 opacity: 1 !important;
+font-size: 13px !important;
 font-weight: 700 !important;
-letter-spacing: 2px !important;
+letter-spacing: 1.8px !important;
 }
 
 /* ── ORDERING (dark section) ── */
@@ -502,44 +504,20 @@ grid-template-columns: 1fr !important;
 #menu .section-shell > .grid .lg\:col-span-3 { display: flex !important; gap: 12px !important; align-items: center !important; }
 #menu .grid { grid-template-columns: 1fr !important; row-gap: 20px !important; }
 #menu .rounded-lg.border { padding: 22px 18px 24px !important; }
-#menu li { font-size: 0.8rem !important; }
+#menu li { font-size: 0.88rem !important; }
 #menu li[data-hasprice] > span:last-child { font-size: 12px !important; padding: 2px 8px !important; }
 
-/* EXTRAS / SNACKS: full text, price on SAME LINE as dish name */
+/* EXTRAS / SNACKS: unclamp text so all items show fully */
 #menu .rounded-lg.border ul { overflow: visible !important; }
 #menu li {
 white-space: normal !important;
 word-break: normal !important;
 overflow-wrap: break-word !important;
-display: block !important;
 -webkit-line-clamp: unset !important;
 -webkit-box-orient: unset !important;
 }
-/* Priced items: flex row — price stays beside dish name on mobile */
-#menu li[data-hasprice] {
-display: flex !important;
-flex-direction: row !important;
-align-items: baseline !important;
-flex-wrap: nowrap !important;
-gap: 8px !important;
-overflow: visible !important;
--webkit-line-clamp: unset !important;
-}
-#menu li[data-hasprice] > span:first-child {
-flex: 1 1 0% !important;
-min-width: 0 !important;
-white-space: normal !important;
-word-break: normal !important;
-overflow-wrap: break-word !important;
-}
-#menu li[data-hasprice] > span:last-child {
-flex-shrink: 0 !important;
-white-space: nowrap !important;
-font-size: 11px !important;
-padding: 1px 7px !important;
-align-self: center !important;
-}
-
+/* Price stays on same line — Tailwind flex justify-between handles layout */
+#menu li.flex { display: flex !important; align-items: baseline !important; }
 /* HERITAGE: reduce top spacing */
 #about .section-shell {
 padding-top: 44px !important;
