@@ -255,6 +255,156 @@ export const HomePage = () => {
     return () => clearInterval(timer);
   }, [heroSlideshow]);
 
+  // ── DESIGN ENHANCEMENTS: DOM mutations run once after mount ──
+  useEffect(() => {
+    // 1. Tag menu items that have a price (enables CSS price pill styling)
+    const menuLis = document.querySelectorAll('#menu li');
+    menuLis.forEach((li) => {
+      if (/£[\d.]+|From £/.test(li.textContent || '')) {
+        li.setAttribute('data-hasprice', 'true');
+      }
+    });
+
+    // 2. Fix Soups "Stew & Fish / Meat / Assorted" line break
+    menuLis.forEach((li) => {
+      if ((li.textContent || '').includes('Stew & Fish / Meat / Assorted')) {
+        li.querySelectorAll('span').forEach((span) => {
+          if ((span.textContent || '').includes('Stew & Fish / Meat / Assorted')) {
+            span.innerHTML = 'Stew\u00a0& Fish\u00a0/<wbr> Meat\u00a0/ Assorted';
+          }
+        });
+      }
+    });
+
+    // 3. Hide duplicate Reserve button (the one outside <nav>)
+    const reserveLinks = document.querySelectorAll('header a[href="/reserve"]');
+    if (reserveLinks.length > 1) {
+      for (let i = 1; i < reserveLinks.length; i++) {
+        (reserveLinks[i] as HTMLElement).style.setProperty('display', 'none', 'important');
+      }
+    }
+
+    // 4. Hide "Rotating weekly specials" text
+    document.querySelectorAll('#menu p').forEach((p) => {
+      if ((p.textContent || '').includes('Rotating weekly specials')) {
+        (p as HTMLElement).style.setProperty('display', 'none', 'important');
+      }
+    });
+
+    // 5. Mark required form fields
+    const requiredNames = ['name', 'phone', 'email'];
+    document.querySelectorAll('#contact form input, #contact form textarea').forEach((el) => {
+      const input = el as HTMLInputElement;
+      const id = (input.id || '').toLowerCase();
+      const name = (input.name || '').toLowerCase();
+      const ph = (input.placeholder || '').toLowerCase();
+      if (requiredNames.some((f) => id.includes(f) || name.includes(f) || ph.includes(f))) {
+        input.setAttribute('required', '');
+      }
+    });
+
+    // Add asterisk to required labels
+    document.querySelectorAll('#contact form label').forEach((label) => {
+      const input = label.querySelector('input, textarea') as HTMLInputElement | null;
+      if (input?.hasAttribute('required')) {
+        const span = label.querySelector('span');
+        if (span && !span.querySelector('.agro-star')) {
+          const star = document.createElement('span');
+          star.className = 'agro-star';
+          star.textContent = ' *';
+          star.style.cssText = 'color:#8a3417;font-weight:700;';
+          span.appendChild(star);
+        }
+      }
+    });
+
+    // 6. Fix event date input to use type="date"
+    document.querySelectorAll('#contact form input').forEach((el) => {
+      const input = el as HTMLInputElement;
+      const ph = (input.placeholder || '').toLowerCase();
+      const name = (input.name || '').toLowerCase();
+      if ((ph.includes('when') || name.includes('date') || name.includes('event')) && input.type === 'text') {
+        input.type = 'date';
+      }
+    });
+
+    // 7. Form success state — intercept send button click
+    const form = document.querySelector('#contact form');
+    if (form && !document.getElementById('agro-success')) {
+      const wrapper = form.parentElement;
+      if (wrapper) {
+        wrapper.style.position = 'relative';
+        const success = document.createElement('div');
+        success.id = 'agro-success';
+        success.style.cssText = [
+          'display:none',
+          'position:absolute',
+          'inset:0',
+          'background:radial-gradient(120% 100%,rgb(255,249,240) 0%,rgb(245,232,206) 60%,rgb(237,220,182) 100%)',
+          'border:1px solid rgba(180,137,47,0.35)',
+          'border-radius:14px 9px 13px 8px',
+          'z-index:10',
+          'flex-direction:column',
+          'align-items:center',
+          'justify-content:center',
+          'text-align:center',
+          'padding:3rem 2rem',
+        ].join(';');
+        success.innerHTML = [
+          '<div style="font-size:3rem;margin-bottom:1rem;color:#b4892f;">\u2713</div>',
+          '<p style="font-family:Fraunces,serif;font-size:1.4rem;color:#2a1a12;font-weight:600;margin-bottom:0.5rem;">Thank you!</p>',
+          '<p style="font-family:Courier New,monospace;font-size:0.72rem;letter-spacing:0.15em;color:#8a3417;text-transform:uppercase;">Your enquiry has been received.<br>We\'ll be in touch shortly.</p>',
+        ].join('');
+        wrapper.appendChild(success);
+        const btn = form.querySelector('button[type="button"]') as HTMLButtonElement | null;
+        if (btn) {
+          btn.addEventListener('click', () => {
+            success.style.display = 'flex';
+            (form as HTMLElement).style.opacity = '0';
+            (form as HTMLElement).style.pointerEvents = 'none';
+          });
+        }
+      }
+    }
+
+    // 8. Improve gallery alt text
+    const altTexts = [
+      'Jollof rice with fried chicken — Agrobeso signature dish',
+      'Banku and tilapia with pepper sauce',
+      'Fufu with light soup and goat meat',
+      'Kelewele — Ghanaian spiced fried plantain',
+      'Waakye served with fish and slaw',
+    ];
+    document.querySelectorAll('#gallery img').forEach((img, i) => {
+      const el = img as HTMLImageElement;
+      if (!el.alt || el.alt.length < 15) el.alt = altTexts[i % altTexts.length];
+    });
+
+    // 9. Scroll-spy: highlight active nav link as user scrolls
+    const sectionIds = ['menu', 'locations', 'about', 'gallery', 'ordering', 'contact'];
+    const navLinks = document.querySelectorAll('header nav a');
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const id = (entry.target as HTMLElement).id;
+              navLinks.forEach((link) => {
+                link.removeAttribute('data-active');
+                if (link.getAttribute('href') === '#' + id) link.setAttribute('data-active', 'true');
+              });
+            }
+          });
+        },
+        { threshold: 0.3 }
+      );
+      sectionIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el);
+      });
+    }
+  }, []);
+
   const peckham = {
     id: 'peckham' as const,
     shortName: 'Peckham',
