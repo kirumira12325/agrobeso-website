@@ -330,11 +330,17 @@ box-shadow: rgba(120,85,25,0.45) 0px 0px 0px 1px !important;
 }
 #menu p.font-display, #menu .mt-6.font-display, #menu .max-w-md.font-display { display: none !important; }
 
-/* ── MENU: fix small "THE MENU" label visibility ── */
-#menu .eyebrow { color: #ffffff !important; }
-#menu p.mt-3.font-mono.uppercase.tracking-widest2 {
-background: #b83a3a !important;
-color: #ffffff !important;
+/* ── MENU: section label + card group title colours ── */
+/* Section badge (THE MENU) — white text on terracotta */
+#menu > .section-shell p.mt-3.font-mono.uppercase.tracking-widest2 { color: #ffffff !important; }
+/* Card group titles (MAIN DISHES — GROUP 1 etc) — dark on parchment */
+#menu .rounded-lg.border .eyebrow,
+#menu .rounded-lg.border p[class*="uppercase"],
+#menu .rounded-lg.border [class*="eyebrow"] {
+color: #2a1a12 !important;
+opacity: 1 !important;
+font-weight: 700 !important;
+letter-spacing: 2px !important;
 }
 
 /* ── ORDERING (dark section) ── */
@@ -499,7 +505,7 @@ grid-template-columns: 1fr !important;
 #menu li { font-size: 0.8rem !important; }
 #menu li[data-hasprice] > span:last-child { font-size: 12px !important; padding: 2px 8px !important; }
 
-/* EXTRAS cards: fix text wrapping and overflow */
+/* EXTRAS / SNACKS: full text, price on SAME LINE as dish name */
 #menu .rounded-lg.border ul { overflow: visible !important; }
 #menu li {
 white-space: normal !important;
@@ -509,17 +515,29 @@ display: block !important;
 -webkit-line-clamp: unset !important;
 -webkit-box-orient: unset !important;
 }
+/* Priced items: flex row — price stays beside dish name on mobile */
 #menu li[data-hasprice] {
 display: flex !important;
--webkit-line-clamp: unset !important;
+flex-direction: row !important;
+align-items: baseline !important;
+flex-wrap: nowrap !important;
+gap: 8px !important;
 overflow: visible !important;
-white-space: normal !important;
+-webkit-line-clamp: unset !important;
 }
 #menu li[data-hasprice] > span:first-child {
+flex: 1 1 0% !important;
+min-width: 0 !important;
 white-space: normal !important;
 word-break: normal !important;
 overflow-wrap: break-word !important;
-min-width: 0 !important;
+}
+#menu li[data-hasprice] > span:last-child {
+flex-shrink: 0 !important;
+white-space: nowrap !important;
+font-size: 11px !important;
+padding: 1px 7px !important;
+align-self: center !important;
 }
 
 /* HERITAGE: reduce top spacing */
@@ -645,6 +663,94 @@ color: rgba(244,239,230,0.6);
 margin-top: 3px;
 }
 #agro-maps-cancel {
+display: block;
+width: 100%;
+margin-top: 4px;
+padding: 12px;
+background: transparent;
+border: 1px solid rgba(42,26,18,0.2);
+border-radius: 4px;
+font-family: 'JetBrains Mono', monospace;
+font-size: 10px;
+letter-spacing: 2px;
+text-transform: uppercase;
+color: rgba(42,26,18,0.55);
+cursor: pointer;
+}
+
+/* ── CALL MODAL: dual-location phone picker ── */
+#agro-call-modal {
+display: none;
+position: fixed;
+inset: 0;
+z-index: 9999;
+background: rgba(26,15,10,0.72);
+align-items: flex-end;
+justify-content: center;
+}
+#agro-call-modal.open { display: flex !important; }
+#agro-call-modal-inner {
+background: radial-gradient(120% 80%, rgb(251,245,234) 0%, rgb(241,228,204) 55%, rgb(229,208,168) 100%);
+border-radius: 20px 20px 0 0;
+padding: 28px 24px 40px;
+width: 100%;
+max-width: 480px;
+border-top: 4px solid #8a3417;
+}
+#agro-call-modal h3 {
+font-family: 'Fraunces', serif;
+font-size: 1.2rem;
+font-weight: 400;
+color: #2a1a12;
+margin: 0 0 6px;
+}
+#agro-call-modal p {
+font-family: 'JetBrains Mono', monospace;
+font-size: 10px;
+letter-spacing: 2px;
+text-transform: uppercase;
+color: rgba(42,26,18,0.5);
+margin: 0 0 20px;
+}
+#agro-call-modal .agro-call-btn {
+display: block;
+width: 100%;
+padding: 16px 20px;
+margin-bottom: 12px;
+background: #2a1a12;
+color: #f4efe6;
+border: none;
+border-radius: 4px;
+font-family: 'JetBrains Mono', monospace;
+font-size: 11px;
+letter-spacing: 2px;
+text-transform: uppercase;
+text-align: left;
+cursor: pointer;
+text-decoration: none;
+transition: background 0.2s ease;
+}
+#agro-call-modal .agro-call-btn:hover { background: #8a3417; }
+#agro-call-modal .agro-call-btn strong {
+display: block;
+font-family: 'Inter', sans-serif;
+font-size: 13px;
+letter-spacing: 0;
+text-transform: none;
+font-weight: 600;
+color: #f4efe6;
+margin-bottom: 3px;
+}
+#agro-call-modal .agro-call-btn span {
+display: block;
+font-family: 'Inter', sans-serif;
+font-size: 12px;
+letter-spacing: 0;
+text-transform: none;
+color: rgba(244,239,230,0.6);
+margin-top: 2px;
+}
+#agro-call-cancel {
 display: block;
 width: 100%;
 margin-top: 4px;
