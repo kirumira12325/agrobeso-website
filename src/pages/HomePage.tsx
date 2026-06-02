@@ -403,6 +403,31 @@ export const HomePage = () => {
         if (el) observer.observe(el);
       });
     }
+  
+    // 10. Maps dual-location modal handler
+    const mapsBtn = document.getElementById('agro-maps-btn');
+    const mapsModal = document.getElementById('agro-maps-modal');
+    const mapsCancel = document.getElementById('agro-maps-cancel');
+    if (mapsBtn && mapsModal) {
+      mapsBtn.addEventListener('click', () => {
+        mapsModal.classList.add('open');
+        mapsModal.style.setProperty('display', 'flex', 'important');
+      });
+    }
+    if (mapsCancel && mapsModal) {
+      mapsCancel.addEventListener('click', () => {
+        mapsModal.classList.remove('open');
+        mapsModal.style.display = 'none';
+      });
+    }
+    if (mapsModal) {
+      mapsModal.addEventListener('click', (e) => {
+        if (e.target === mapsModal) {
+          mapsModal.classList.remove('open');
+          mapsModal.style.display = 'none';
+        }
+      });
+    }
   }, []);
 
   const peckham = {
@@ -811,10 +836,27 @@ export const HomePage = () => {
         <ul className="grid grid-cols-4 gap-2">
           <li><a href="#menu" className="sticky-nav-btn">Menu</a></li>
           <li><a href={thorntonHeath.phoneHref} className="sticky-nav-btn">Call</a></li>
-          <li><a href={buildMapUrl(thorntonHeath.mapsQuery)} target="_blank" rel="noreferrer" className="sticky-nav-btn">Map</a></li>
+          <li><button type="button" id="agro-maps-btn" className="sticky-nav-btn w-full" style={{background:'transparent',border:'1px solid rgba(42,26,18,0.15)',cursor:'pointer',fontFamily:'inherit',fontSize:'10px',letterSpacing:'0.1em',textTransform:'uppercase',color:'#2A1810'}}>Map</button></li>
           <li><a href="/reserve" className="sticky-nav-btn">Reserve</a></li>
         </ul>
       </nav>
+
+      {/* MAPS DUAL-LOCATION MODAL */}
+      <div id="agro-maps-modal" role="dialog" aria-modal="true" aria-label="Choose a location">
+        <div id="agro-maps-modal-inner">
+          <h3>Choose a location</h3>
+          <p>Select which Agrobeso to visit</p>
+          <a href={buildMapUrl(peckham.mapsQuery)} target="_blank" rel="noreferrer" className="agro-map-btn">
+            Peckham
+            <span>139 Peckham High Street, SE15 5SL</span>
+          </a>
+          <a href={buildMapUrl(thorntonHeath.mapsQuery)} target="_blank" rel="noreferrer" className="agro-map-btn">
+            Thornton Heath
+            <span>23 Brigstock Road, CR7 7JJ</span>
+          </a>
+          <button type="button" id="agro-maps-cancel">Cancel</button>
+        </div>
+      </div>
 
       <script type="application/ld+json">{JSON.stringify(schema)}</script>
     </>
