@@ -1,0 +1,21 @@
+{
+  "name": "Agrobeso",
+  "short_name": "Agrobeso",
+  "description": "Authentic Ghanaian and West African Food in South London",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f1ea",
+  "theme_color": "#395f4a",
+  "icons": [
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
