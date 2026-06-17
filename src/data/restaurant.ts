@@ -1,4 +1,4 @@
-export type RestaurantLocation = {
+––––export type RestaurantLocation = {
   id: 'peckham' | 'thornton-heath';
   name: string;
   shortName: string;
