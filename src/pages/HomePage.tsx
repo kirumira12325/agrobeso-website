@@ -146,7 +146,7 @@ export const HomePage = () => {
     items: Array<{ name: string; price?: string }>;
   }>>([]);
 
-  useEffect(()   useEffect(() => {
+  useEffect(() => {
     const CACHE_KEY = 'agrobeso_sc_v1';
     const CACHE_TTL = 300000; // 5 minutes
 
@@ -222,7 +222,7 @@ export const HomePage = () => {
     });
   }, []);
 
-   {
+    useEffect(() => {
     const allSlugs = Object.keys(dishImgs);
     const featured = heroSlideshowSlugs.length > 0 ? heroSlideshowSlugs.filter(sl => dishImgs[sl]) : allSlugs;
     const slides = featured.map((slug, i) => ({
