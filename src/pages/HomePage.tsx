@@ -505,7 +505,7 @@ export const HomePage = () => {
           <div className="section-shell grid grid-cols-1 items-center gap-8 py-12 lg:grid-cols-12 lg:gap-8">
             <div className="lg:col-span-7 reveal">
               <p className="eyebrow mb-10 !whitespace-normal">— {<span style={hStyle(c, 'hero_tagline')}>{c.hero_tagline}</span>}</p>
-              <h1 className="display text-[clamp(36px,5.5vw,88px)]" style={hStyle(c, 'hero_headline_line1')}>
+              <h1 aria-label="Authentic Ghanaian and West African Food in South London" className="display text-[clamp(36px,5.5vw,88px)]" style={hStyle(c, 'hero_headline_line1')}>
                 {<span style={hStyle(c, 'hero_headline_line1')}>{c.hero_headline_line1}</span>}<br />{<span style={hStyle(c, 'hero_headline_line2')}>{c.hero_headline_line2}</span>}<br />
                 <em className="font-display italic text-brand-clay">{<span style={hStyle(c, 'hero_headline_italic')}>{c.hero_headline_italic}</span>}</em>
               </h1>
