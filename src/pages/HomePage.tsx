@@ -192,7 +192,7 @@ export const HomePage = () => {
         }
       }
     } catch (_e) {
-      // sessionStorage unavailable or corrupt — fall through to network
+      // sessionStorage unavailable — fall through to network
     }
 
     if (!served) {
@@ -200,32 +200,20 @@ export const HomePage = () => {
         if (data && data.length > 0) {
           try {
             sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), rows: data }));
-          } catch (_e) { /* storage full — ignore */ }
+          } catch (_e) { /* storage full */ }
           applyData(data as { id: string; value: string }[]);
         }
       });
     }
 
-    // Load gallery images from Supabase storage (gallery category)
+    // Load gallery images from Supabase storage
     supabase.storage.from('images').list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
     .then(({ data }) => {
       if (data) {
-        const galleryFiles = data
-          .filter((f: any) => f.name && (f.name.startsWith('gallery-') || f.name.startsWith('hero-')) && f.name !== '.emptyFolderPlaceholder')
-          .map((f: any) => STORAGE_URL + '/' + f.name);
-
-        const heroFiles = data
-          .filter((f: any) => f.name && f.name.startsWith('hero-') && f.name !== '.emptyFolderPlaceholder')
-          .map((f: any) => STORAGE_URL + '/' + f.name);
-
-        const galleryOnlyFiles = data
-          .filter((f: any) => f.name && f.name.startsWith('gallery-') && f.name !== '.emptyFolderPlaceholder')
-          .map((f: any) => STORAGE_URL + '/' + f.name);
-
+        const heroFiles = data.filter((f: any) => f.name && f.name.startsWith('hero-') && f.name !== '.emptyFolderPlaceholder').map((f: any) => STORAGE_URL + '/' + f.name);
+        const galleryOnlyFiles = data.filter((f: any) => f.name && f.name.startsWith('gallery-') && f.name !== '.emptyFolderPlaceholder').map((f: any) => STORAGE_URL + '/' + f.name);
         if (heroFiles.length > 0) setHeroImg(heroFiles[0]);
         if (galleryOnlyFiles.length > 0) setGalleryImgs(galleryOnlyFiles);
-
-        // Load location images
         const locImgMap: Record<string, string> = {};
         data.forEach((f: any) => {
           if (f.name && f.name !== '.emptyFolderPlaceholder') {
@@ -236,9 +224,10 @@ export const HomePage = () => {
         setLocationImgs(locImgMap);
       }
     });
-  }, []);ideshow list whenever dishImgs or heroSlideshowSlugs change
-  useEffect(() => {
-    const allSlugs = Object.keys(dishImgs);
+  }, []);
+
+  // Build slideshow list whenever dishImgs or heroSlideshowSlugs change
+     const allSlugs = Object.keys(dishImgs);
     const featured = heroSlideshowSlugs.length > 0 ? heroSlideshowSlugs.filter(sl => dishImgs[sl]) : allSlugs;
     const slides = featured.map((slug, i) => ({
       slug,
