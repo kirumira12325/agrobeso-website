@@ -533,7 +533,7 @@ export const HomePage = () => {
                         pointerEvents: idx === heroSlideIdx ? 'auto' : 'none',
                       }}
                     >
-                      <img src={slide.imgUrl} alt={slide.name} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}} />
+                      <img loading="lazy" src={slide.imgUrl} alt={slide.name} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}} />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-10 text-brand-bone">
                         <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/70">No. {String(slide.num).padStart(2,'0')} / Of the season</p>
                         <p className="mt-4 font-display text-3xl italic">{slide.name}</p>
@@ -564,7 +564,7 @@ export const HomePage = () => {
                 </div>
               ) : heroImg ? (
                 <div className="aspect-[4/5] w-full overflow-hidden rounded-lg relative">
-                  <img src={heroImg} alt="Agrobeso hero" className="w-full h-full object-cover" />
+                  <img loading="lazy" src={heroImg} alt="Agrobeso hero" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-10 text-brand-bone">
                     <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/70">No. 01 / Of the season</p>
                     <p className="mt-4 font-display text-3xl italic">{<span style={hStyle(c, 'hero_featured_dish')}>{c.hero_featured_dish}</span>}</p>
@@ -697,12 +697,12 @@ export const HomePage = () => {
                   <p className="mt-6 max-w-sm text-[15px] leading-relaxed text-brand-cocoa/70"><span style={hStyle(c, location.addressFieldId)}>{location.address}</span></p>
                   <p className="mt-4 font-display text-sm italic text-brand-cocoa/50"><span style={hStyle(c, location.hoursFieldId)}>{location.openingHoursPlaceholder}</span></p>
                   <div className="mt-10 flex flex-wrap gap-6 font-mono text-[11px] uppercase tracking-widest2">
-                    <a href={buildMapUrl(location.mapsQuery)} target="_blank" rel="noreferrer" className="border-b border-brand-cocoa pb-1 text-brand-cocoa transition hover:text-brand-clay">Directions &rarr;</a>
+                    <a href={buildMapUrl(location.mapsQuery)} target="_blank" rel="noopener noreferrer" className="border-b border-brand-cocoa pb-1 text-brand-cocoa transition hover:text-brand-clay">Directions &rarr;</a>
                     <a href={location.phoneHref} className="border-b border-brand-cocoa/30 pb-1 text-brand-cocoa/70 transition hover:border-brand-cocoa hover:text-brand-cocoa">Call</a>
                   </div>
                   {locationImgs[location.id.replace('-', '')] && (
                     <div className="mt-8 overflow-hidden rounded-lg">
-                      <img
+                      <img loading="lazy"
                         src={locationImgs[location.id.replace('-', '')]}
                         alt={location.shortName + ' restaurant'}
                         className="w-full h-56 object-cover"
@@ -732,26 +732,26 @@ export const HomePage = () => {
               {galleryImgs.length > 0 ? (
                 <>
                   <div className="col-span-12 aspect-[3/2] md:col-span-7 overflow-hidden rounded-lg">
-                    <img src={galleryImgs[0]} alt="Gallery 1" className="w-full h-full object-cover" />
+                    <img loading="lazy" src={galleryImgs[0]} alt="Gallery 1" className="w-full h-full object-cover" />
                   </div>
                   <div className="col-span-12 aspect-[3/2] md:col-span-5 overflow-hidden rounded-lg">
                     {galleryImgs[1]
-                      ? <img src={galleryImgs[1]} alt="Gallery 2" className="w-full h-full object-cover" />
+                      ? <img loading="lazy" src={galleryImgs[1]} alt="Gallery 2" className="w-full h-full object-cover" />
                       : <div className="canvas-img-dark w-full h-full" />}
                   </div>
                   <div className="col-span-6 aspect-square md:col-span-4 overflow-hidden rounded-lg">
                     {galleryImgs[2]
-                      ? <img src={galleryImgs[2]} alt="Gallery 3" className="w-full h-full object-cover" />
+                      ? <img loading="lazy" src={galleryImgs[2]} alt="Gallery 3" className="w-full h-full object-cover" />
                       : <div className="canvas-img-dark w-full h-full" />}
                   </div>
                   <div className="col-span-6 aspect-square md:col-span-4 overflow-hidden rounded-lg">
                     {galleryImgs[3]
-                      ? <img src={galleryImgs[3]} alt="Gallery 4" className="w-full h-full object-cover" />
+                      ? <img loading="lazy" src={galleryImgs[3]} alt="Gallery 4" className="w-full h-full object-cover" />
                       : <div className="canvas-img w-full h-full" />}
                   </div>
                   <div className="col-span-12 aspect-[3/2] md:col-span-4 overflow-hidden rounded-lg">
                     {galleryImgs[4]
-                      ? <img src={galleryImgs[4]} alt="Gallery 5" className="w-full h-full object-cover" />
+                      ? <img loading="lazy" src={galleryImgs[4]} alt="Gallery 5" className="w-full h-full object-cover" />
                       : <div className="canvas-img w-full h-full" />}
                   </div>
                 </>
@@ -777,7 +777,7 @@ export const HomePage = () => {
             <div className="mx-auto mt-16 flex max-w-2xl flex-wrap items-center justify-center gap-8 font-mono text-[11px] uppercase tracking-widest2">
               <a href={peckham.phoneHref} className="border-b border-brand-cocoa pb-1 text-brand-cocoa transition hover:text-brand-clay">Call Peckham &rarr;</a>
               <a href={thorntonHeath.phoneHref} className="border-b border-brand-cocoa pb-1 text-brand-cocoa transition hover:text-brand-clay">Call Thornton Heath &rarr;</a>
-              <a href={buildMapUrl(thorntonHeath.mapsQuery)} target="_blank" rel="noreferrer" className="border-b border-brand-cocoa/30 pb-1 text-brand-cocoa/70 transition hover:border-brand-cocoa hover:text-brand-cocoa">Directions</a>
+              <a href={buildMapUrl(thorntonHeath.mapsQuery)} target="_blank" rel="noopener noreferrer" className="border-b border-brand-cocoa/30 pb-1 text-brand-cocoa/70 transition hover:border-brand-cocoa hover:text-brand-cocoa">Directions</a>
             </div>
           </div>
         </section>
@@ -871,11 +871,11 @@ export const HomePage = () => {
         <div id="agro-maps-modal-inner">
           <h3>Choose a location</h3>
           <p>Select which Agrobeso to visit</p>
-          <a href={buildMapUrl(peckham.mapsQuery)} target="_blank" rel="noreferrer" className="agro-map-btn">
+          <a href={buildMapUrl(peckham.mapsQuery)} target="_blank" rel="noopener noreferrer" className="agro-map-btn">
             Peckham
             <span>139 Peckham High Street, SE15 5SL</span>
           </a>
-          <a href={buildMapUrl(thorntonHeath.mapsQuery)} target="_blank" rel="noreferrer" className="agro-map-btn">
+          <a href={buildMapUrl(thorntonHeath.mapsQuery)} target="_blank" rel="noopener noreferrer" className="agro-map-btn">
             Thornton Heath
             <span>23 Brigstock Road, CR7 7JJ</span>
           </a>
