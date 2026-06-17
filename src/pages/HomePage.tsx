@@ -146,7 +146,7 @@ export const HomePage = () => {
     items: Array<{ name: string; price?: string }>;
   }>>([]);
 
-  useEffect(() =>  useEffect(() => {
+  useEffect(()   useEffect(() => {
     const CACHE_KEY = 'agrobeso_sc_v1';
     const CACHE_TTL = 300000; // 5 minutes
 
@@ -178,7 +178,6 @@ export const HomePage = () => {
       if (dt.border_radius) root.style.setProperty('--radius', dt.border_radius + 'px');
     };
 
-    // Serve from sessionStorage if fresh
     let served = false;
     try {
       const cached = sessionStorage.getItem(CACHE_KEY);
@@ -191,22 +190,19 @@ export const HomePage = () => {
           sessionStorage.removeItem(CACHE_KEY);
         }
       }
-    } catch (_e) {
-      // sessionStorage unavailable — fall through to network
-    }
+    } catch (_e) { /* ignore */ }
 
     if (!served) {
       supabase.from('site_content').select('id, value').then(({ data }) => {
         if (data && data.length > 0) {
           try {
             sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), rows: data }));
-          } catch (_e) { /* storage full */ }
+          } catch (_e) { /* ignore */ }
           applyData(data as { id: string; value: string }[]);
         }
       });
     }
 
-    // Load gallery images from Supabase storage
     supabase.storage.from('images').list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
     .then(({ data }) => {
       if (data) {
@@ -226,20 +222,7 @@ export const HomePage = () => {
     });
   }, []);
 
-  // Build slideshow list whenever dishImgs or heroSlideshowSlugs change
-     const allSlugs = Object.keys(dishImgs);
-    const featured = heroSlideshowSlugs.length > 0 ? heroSlideshowSlugs.filter(sl => dishImgs[sl]) : allSlugs;
-    const slides = featured.map((slug, i) => ({
-      slug,
-      name: slugToName[slug] || slug,
-      imgUrl: dishImgs[slug],
-      num: i + 1,
-    }));
-    setHeroSlideshow(slides);
-    setHeroSlideIdx(0);
-  }, [dishImgs, heroSlideshowSlugs]);
-
-  useEffect(() => {
+   {
     supabase
       .from('site_content')
       .select('id, value')
