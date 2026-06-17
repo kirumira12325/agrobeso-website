@@ -186,7 +186,7 @@ export const HomePage = () => {
       return false;
     };
     if (!_doCacheLoad()) {
-    .from('site_content')
+    supabase.from('site_content')
       .select('id, value')
       .then(({ data }) => {
       try { sessionStorage.setItem(_CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch {}
