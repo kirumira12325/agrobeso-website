@@ -223,6 +223,19 @@ export const HomePage = () => {
   }, []);
 
    {
+    const allSlugs = Object.keys(dishImgs);
+    const featured = heroSlideshowSlugs.length > 0 ? heroSlideshowSlugs.filter(sl => dishImgs[sl]) : allSlugs;
+    const slides = featured.map((slug, i) => ({
+      slug,
+      name: slugToName[slug] || slug,
+      imgUrl: dishImgs[slug],
+      num: i + 1,
+    }));
+    setHeroSlideshow(slides);
+    setHeroSlideIdx(0);
+  }, [dishImgs, heroSlideshowSlugs]);
+
+  useEffect(() => {
     supabase
       .from('site_content')
       .select('id, value')
