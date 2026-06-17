@@ -1,4 +1,4 @@
-––––export type RestaurantLocation = {
+export type RestaurantLocation = {
   id: 'peckham' | 'thornton-heath';
   name: string;
   shortName: string;
@@ -13,13 +13,13 @@ export const siteMeta = {
   brandName: 'Agrobeso',
   title: 'Agrobeso | Authentic Ghanaian & West African Food in South London',
   description:
-    'Authentic Ghanaian and West African food in Peckham and Thornton Heath. Enjoy jollof rice, waakye, kenkey, banku, okra stew, peanut soup, fufu, fried fish, and more.'
+    'Authentic Ghanaian and West African food in Peckham and Thornton Heath. Enjoy jollof rice, waakye, kenkey, banku, okra stew, peanut soup, fufu, fried fish, and more.',
 };
 
 export const heroContent = {
   headline: 'Authentic Ghanaian & West African Food in South London',
   subheadline:
-    'Home-style dishes, bold flavours, generous portions, and warm hospitality from Peckham to Thornton Heath.'
+    'Home-style dishes, bold flavours, generous portions, and warm hospitality from Peckham to Thornton Heath.',
 };
 
 export const locations: RestaurantLocation[] = [
@@ -27,22 +27,22 @@ export const locations: RestaurantLocation[] = [
     id: 'peckham',
     name: 'Agrobeso African Cuisine',
     shortName: 'Peckham',
-    address: '139 Peckham High St, London SE15 5SL',
-    phoneLabel: 'Phone to be confirmed',
-    phoneHref: '#',
-    mapsQuery: '139 Peckham High St, London SE15 5SL',
-    openingHoursPlaceholder: 'Opening hours placeholder: confirm directly with branch before launch.'
+    address: '139 Peckham High Street, London SE15 5SL',
+    phoneLabel: '020 7732 3721',
+    phoneHref: 'tel:+442077323721',
+    mapsQuery: '139 Peckham High Street, Peckham SE15 5SL',
+    openingHoursPlaceholder: 'Mon–Sun 12:00pm–9:30pm',
   },
   {
     id: 'thornton-heath',
     name: 'Agrobeso Thornton Heath',
     shortName: 'Thornton Heath',
-    address: '23 Brigstock Rd, Thornton Heath CR7 7JJ',
-    phoneLabel: '+44 20 8684 6699',
+    address: '23 Brigstock Road, Thornton Heath CR7 7JJ',
+    phoneLabel: '020 8684 6699',
     phoneHref: 'tel:+442086846699',
-    mapsQuery: '23 Brigstock Rd, Thornton Heath CR7 7JJ',
-    openingHoursPlaceholder: 'Opening hours placeholder: listings conflict, verify before go-live.'
-  }
+    mapsQuery: '23 Brigstock Road, Thornton Heath CR7 7JJ',
+    openingHoursPlaceholder: 'Mon–Sun 12:00pm–9:30pm',
+  },
 ];
 
 export const signatureDishes = [
@@ -53,28 +53,28 @@ export const signatureDishes = [
   'Peanut Soup',
   'Fufu / Pounded Yam',
   'Fried Fish / Tilapia',
-  'Tuo Zaafi'
+  'Tuo Zaafi',
 ];
 
 export const menuGroups = [
   {
     title: 'Rice dishes',
-    items: ['Jollof rice combinations', 'Waakye plates', 'Fried rice selections']
+    items: ['Jollof rice combinations', 'Waakye plates', 'Fried rice selections'],
   },
   {
     title: 'Soups and stews',
-    items: ['Peanut soup', 'Light soup', 'Okra stew']
+    items: ['Peanut soup', 'Light soup', 'Okra stew'],
   },
   {
     title: 'Swallows and sides',
-    items: ['Fufu', 'Pounded yam', 'Banku', 'Kenkey', 'Plantain and gari sides']
+    items: ['Fufu', 'Pounded yam', 'Banku', 'Kenkey', 'Plantain and gari sides'],
   },
   {
     title: 'Fish and meat dishes',
-    items: ['Fried tilapia', 'Grilled fish', 'Goat and chicken options']
+    items: ['Fried tilapia', 'Grilled fish', 'Goat and chicken options'],
   },
   {
     title: 'Snacks and drinks',
-    items: ['Puff puff and pastries', 'Soft drinks', 'Traditional refreshments']
-  }
+    items: ['Puff puff and pastries', 'Soft drinks', 'Traditional refreshments'],
+  },
 ];
