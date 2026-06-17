@@ -146,74 +146,97 @@ export const HomePage = () => {
     items: Array<{ name: string; price?: string }>;
   }>>([]);
 
-  useEffect(() => {
-    supabase
-      supabase
-.from('site_content')
-.select('id, value')
-.then(({ data }) => {
-if (data && data.length > 0) {
-const map: Record<string, string> = { ...defaultContent };
-const designTokens: Record<string, string> = {};
-const dishImageMap: Record<string, string> = {};
-data.forEach((row: { id: string; value: string }) => {
-if (row.id.startsWith('design__')) {
-designTokens[row.id.replace('design__', '')] = row.value;
-} else if (row.id.startsWith('dish_img__')) {
-dishImageMap[row.id.replace('dish_img__', '')] = row.value;
-} else if (row.id === 'hero_slideshow') {
-setHeroSlideshowSlugs(row.value ? row.value.split(',').map((x: string) => x.trim()).filter(Boolean) : []);
-} else {
-map[row.id] = row.value;
-}
-});
-setC(map);
-setDishImgs(dishImageMap);
-const root = document.documentElement;
-if (designTokens.color_primary) root.style.setProperty('--color-primary', designTokens.color_primary);
-if (designTokens.color_secondary) root.style.setProperty('--color-secondary', designTokens.color_secondary);
-if (designTokens.color_accent) root.style.setProperty('--color-accent', designTokens.color_accent);
-if (designTokens.color_background) root.style.setProperty('--color-bg', designTokens.color_background);
-if (designTokens.color_text) root.style.setProperty('--color-text', designTokens.color_text);
-if (designTokens.font_heading) root.style.setProperty('--font-heading', designTokens.font_heading);
-if (designTokens.font_body) root.style.setProperty('--font-body', designTokens.font_body);
-if (designTokens.border_radius) root.style.setProperty('--radius', designTokens.border_radius + 'px');
-}
-});
+  useEffect(() =>  useEffect(() => {
+    const CACHE_KEY = 'agrobeso_sc_v1';
+    const CACHE_TTL = 300000; // 5 minutes
+
+    const applyData = (rows: { id: string; value: string }[]) => {
+      const map: Record<string, string> = { ...defaultContent };
+      const dt: Record<string, string> = {};
+      const di: Record<string, string> = {};
+      rows.forEach((row) => {
+        if (row.id.startsWith('design__')) {
+          dt[row.id.replace('design__', '')] = row.value;
+        } else if (row.id.startsWith('dish_img__')) {
+          di[row.id.replace('dish_img__', '')] = row.value;
+        } else if (row.id === 'hero_slideshow') {
+          setHeroSlideshowSlugs(row.value ? row.value.split(',').map((x) => x.trim()).filter(Boolean) : []);
+        } else {
+          map[row.id] = row.value;
+        }
+      });
+      setC(map);
+      setDishImgs(di);
+      const root = document.documentElement;
+      if (dt.color_primary) root.style.setProperty('--color-primary', dt.color_primary);
+      if (dt.color_secondary) root.style.setProperty('--color-secondary', dt.color_secondary);
+      if (dt.color_accent) root.style.setProperty('--color-accent', dt.color_accent);
+      if (dt.color_background) root.style.setProperty('--color-bg', dt.color_background);
+      if (dt.color_text) root.style.setProperty('--color-text', dt.color_text);
+      if (dt.font_heading) root.style.setProperty('--font-heading', dt.font_heading);
+      if (dt.font_body) root.style.setProperty('--font-body', dt.font_body);
+      if (dt.border_radius) root.style.setProperty('--radius', dt.border_radius + 'px');
+    };
+
+    // Serve from sessionStorage if fresh
+    let served = false;
+    try {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Date.now() - parsed.ts < CACHE_TTL && Array.isArray(parsed.rows)) {
+          applyData(parsed.rows);
+          served = true;
+        } else {
+          sessionStorage.removeItem(CACHE_KEY);
+        }
+      }
+    } catch (_e) {
+      // sessionStorage unavailable or corrupt — fall through to network
+    }
+
+    if (!served) {
+      supabase.from('site_content').select('id, value').then(({ data }) => {
+        if (data && data.length > 0) {
+          try {
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), rows: data }));
+          } catch (_e) { /* storage full — ignore */ }
+          applyData(data as { id: string; value: string }[]);
+        }
+      });
+    }
 
     // Load gallery images from Supabase storage (gallery category)
     supabase.storage.from('images').list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
-      .then(({ data }) => {
-        if (data) {
-          const galleryFiles = data
-            .filter((f: any) => f.name && (f.name.startsWith('gallery-') || f.name.startsWith('hero-')) && f.name !== '.emptyFolderPlaceholder')
-            .map((f: any) => STORAGE_URL + '/' + f.name);
+    .then(({ data }) => {
+      if (data) {
+        const galleryFiles = data
+          .filter((f: any) => f.name && (f.name.startsWith('gallery-') || f.name.startsWith('hero-')) && f.name !== '.emptyFolderPlaceholder')
+          .map((f: any) => STORAGE_URL + '/' + f.name);
 
-          const heroFiles = data
-            .filter((f: any) => f.name && f.name.startsWith('hero-') && f.name !== '.emptyFolderPlaceholder')
-            .map((f: any) => STORAGE_URL + '/' + f.name);
+        const heroFiles = data
+          .filter((f: any) => f.name && f.name.startsWith('hero-') && f.name !== '.emptyFolderPlaceholder')
+          .map((f: any) => STORAGE_URL + '/' + f.name);
 
-          const galleryOnlyFiles = data
-            .filter((f: any) => f.name && f.name.startsWith('gallery-') && f.name !== '.emptyFolderPlaceholder')
-            .map((f: any) => STORAGE_URL + '/' + f.name);
+        const galleryOnlyFiles = data
+          .filter((f: any) => f.name && f.name.startsWith('gallery-') && f.name !== '.emptyFolderPlaceholder')
+          .map((f: any) => STORAGE_URL + '/' + f.name);
 
-          if (heroFiles.length > 0) setHeroImg(heroFiles[0]);
-          if (galleryOnlyFiles.length > 0) setGalleryImgs(galleryOnlyFiles);
+        if (heroFiles.length > 0) setHeroImg(heroFiles[0]);
+        if (galleryOnlyFiles.length > 0) setGalleryImgs(galleryOnlyFiles);
 
-          // Load location images
-          const locImgMap: Record<string, string> = {};
-          data.forEach((f: any) => {
-            if (f.name && f.name !== '.emptyFolderPlaceholder') {
-              if (f.name.startsWith('peckham-')) locImgMap['peckham'] = STORAGE_URL + '/' + f.name;
-              if (f.name.startsWith('thorntonheath-')) locImgMap['thorntonheath'] = STORAGE_URL + '/' + f.name;
-            }
-          });
-          setLocationImgs(locImgMap);
-        }
-      });
-  }, []);
-
-  // Build slideshow list whenever dishImgs or heroSlideshowSlugs change
+        // Load location images
+        const locImgMap: Record<string, string> = {};
+        data.forEach((f: any) => {
+          if (f.name && f.name !== '.emptyFolderPlaceholder') {
+            if (f.name.startsWith('peckham-')) locImgMap['peckham'] = STORAGE_URL + '/' + f.name;
+            if (f.name.startsWith('thorntonheath-')) locImgMap['thorntonheath'] = STORAGE_URL + '/' + f.name;
+          }
+        });
+        setLocationImgs(locImgMap);
+      }
+    });
+  }, []);ideshow list whenever dishImgs or heroSlideshowSlugs change
   useEffect(() => {
     const allSlugs = Object.keys(dishImgs);
     const featured = heroSlideshowSlugs.length > 0 ? heroSlideshowSlugs.filter(sl => dishImgs[sl]) : allSlugs;
