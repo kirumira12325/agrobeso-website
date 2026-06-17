@@ -148,83 +148,40 @@ export const HomePage = () => {
 
   useEffect(() => {
     supabase
-      // --- session cache check ---
-    const _CACHE_KEY = 'agrobeso_sc_v1';
-    const _CACHE_TTL = 5 * 60 * 1000;
-    const _doCacheLoad = () => {
-      try {
-        const _r = sessionStorage.getItem(_CACHE_KEY);
-        if (_r) {
-          const _p = JSON.parse(_r);
-          if (Date.now() - _p.ts < _CACHE_TTL) {
-            const _d = _p.data;
-            if (_d && _d.length > 0) {
-              const _map: Record<string,string> = {...defaultContent};
-              const _dt: Record<string,string> = {};
-              const _di: Record<string,string> = {};
-              _d.forEach((_row: {id:string;value:string}) => {
-                if(_row.id.startsWith('design__')){_dt[_row.id.replace('design__','')]=_row.value;}
-                else if(_row.id.startsWith('dish_img__')){_di[_row.id.replace('dish_img__','')]=_row.value;}
-                else if(_row.id==='hero_slideshow'){setHeroSlideshowSlugs(_row.value?_row.value.split(',').map((_x:string)=>_x.trim()).filter(Boolean):[]);}
-                else{_map[_row.id]=_row.value;}
-              });
-              setC(_map); setDishImgs(_di);
-              const _root=document.documentElement;
-              if(_dt.color_primary)_root.style.setProperty('--color-primary',_dt.color_primary);
-              if(_dt.color_secondary)_root.style.setProperty('--color-secondary',_dt.color_secondary);
-              if(_dt.color_accent)_root.style.setProperty('--color-accent',_dt.color_accent);
-              if(_dt.color_background)_root.style.setProperty('--color-bg',_dt.color_background);
-              if(_dt.color_text)_root.style.setProperty('--color-text',_dt.color_text);
-              if(_dt.font_heading)_root.style.setProperty('--font-heading',_dt.font_heading);
-              if(_dt.font_body)_root.style.setProperty('--font-body',_dt.font_body);
-              if(_dt.border_radius)_root.style.setProperty('--radius',_dt.border_radius+'px');
-            }
-            return true;
-          } else { sessionStorage.removeItem(_CACHE_KEY); }
-        }
-      } catch { sessionStorage.removeItem(_CACHE_KEY); }
-      return false;
-    };
-    if (!_doCacheLoad()) {
-    supabase.from('site_content')
-      .select('id, value')
-      .then(({ data }) => {
-      try { sessionStorage.setItem(_CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch {}
-        if (data && data.length > 0) {
-          const map: Record<string, string> = { ...defaultContent };
-          const designTokens: Record<string, string> = {};
-          const dishImageMap: Record<string, string> = {};
+      supabase
+.from('site_content')
+.select('id, value')
+.then(({ data }) => {
+if (data && data.length > 0) {
+const map: Record<string, string> = { ...defaultContent };
+const designTokens: Record<string, string> = {};
+const dishImageMap: Record<string, string> = {};
+data.forEach((row: { id: string; value: string }) => {
+if (row.id.startsWith('design__')) {
+designTokens[row.id.replace('design__', '')] = row.value;
+} else if (row.id.startsWith('dish_img__')) {
+dishImageMap[row.id.replace('dish_img__', '')] = row.value;
+} else if (row.id === 'hero_slideshow') {
+setHeroSlideshowSlugs(row.value ? row.value.split(',').map((x: string) => x.trim()).filter(Boolean) : []);
+} else {
+map[row.id] = row.value;
+}
+});
+setC(map);
+setDishImgs(dishImageMap);
+const root = document.documentElement;
+if (designTokens.color_primary) root.style.setProperty('--color-primary', designTokens.color_primary);
+if (designTokens.color_secondary) root.style.setProperty('--color-secondary', designTokens.color_secondary);
+if (designTokens.color_accent) root.style.setProperty('--color-accent', designTokens.color_accent);
+if (designTokens.color_background) root.style.setProperty('--color-bg', designTokens.color_background);
+if (designTokens.color_text) root.style.setProperty('--color-text', designTokens.color_text);
+if (designTokens.font_heading) root.style.setProperty('--font-heading', designTokens.font_heading);
+if (designTokens.font_body) root.style.setProperty('--font-body', designTokens.font_body);
+if (designTokens.border_radius) root.style.setProperty('--radius', designTokens.border_radius + 'px');
+}
+});
 
-          data.forEach((row: { id: string; value: string }) => {
-            if (row.id.startsWith('design__')) {
-              designTokens[row.id.replace('design__', '')] = row.value;
-            } else if (row.id.startsWith('dish_img__')) {
-              dishImageMap[row.id.replace('dish_img__', '')] = row.value;
-            } else if (row.id === 'hero_slideshow') {
-              setHeroSlideshowSlugs(row.value ? row.value.split(',').map((x: string) => x.trim()).filter(Boolean) : []);
-            } else {
-              map[row.id] = row.value;
-            }
-          });
-
-          setC(map);
-          setDishImgs(dishImageMap);
-
-          // Apply design tokens as CSS custom properties
-          const root = document.documentElement;
-          if (designTokens.color_primary) root.style.setProperty('--color-primary', designTokens.color_primary);
-          if (designTokens.color_secondary) root.style.setProperty('--color-secondary', designTokens.color_secondary);
-          if (designTokens.color_accent) root.style.setProperty('--color-accent', designTokens.color_accent);
-          if (designTokens.color_background) root.style.setProperty('--color-bg', designTokens.color_background);
-          if (designTokens.color_text) root.style.setProperty('--color-text', designTokens.color_text);
-          if (designTokens.font_heading) root.style.setProperty('--font-heading', designTokens.font_heading);
-          if (designTokens.font_body) root.style.setProperty('--font-body', designTokens.font_body);
-          if (designTokens.border_radius) root.style.setProperty('--radius', designTokens.border_radius + 'px');
-        }
-      });
-
-    // Load g
-    }allery images from Supabase storage (gallery category)
+    // Load gallery images from Supabase storage (gallery category)
     supabase.storage.from('images').list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
       .then(({ data }) => {
         if (data) {
