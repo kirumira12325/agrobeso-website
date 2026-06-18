@@ -509,13 +509,13 @@ export const HomePage = () => {
         {/* HERO */}
         <section className="hero-pattern relative overflow-hidden">
           <div className="section-shell grid grid-cols-1 items-center gap-8 py-12 lg:grid-cols-12 lg:gap-8">
-            <div className="lg:col-span-7 reveal">
-              <p className="eyebrow mb-10 !whitespace-normal">— {<span style={hStyle(c, 'hero_tagline')}>{c.hero_tagline}</span>}</p>
-              <h1 aria-label="Authentic Ghanaian and West African Food in South London" className="display text-[clamp(36px,5.5vw,88px)]" style={hStyle(c, 'hero_headline_line1')}>
-                {<span style={hStyle(c, 'hero_headline_line1')}>{c.hero_headline_line1}</span>}<br />{<span style={hStyle(c, 'hero_headline_line2')}>{c.hero_headline_line2}</span>}<br />
-                <em className="font-display italic text-brand-clay">{<span style={hStyle(c, 'hero_headline_italic')}>{c.hero_headline_italic}</span>}</em>
+            <div className="lg:col-span-7 reveal flex flex-col justify-center">
+              <h1 aria-label="A taste of West Africa in London" className="display" style={{fontSize:'clamp(30px,4.6vw,68px)',lineHeight:1.08,letterSpacing:'-0.01em'}}>
+                <span className="block text-brand-clay" style={hStyle(c, 'hero_headline_line1')}>{c.hero_headline_line1}</span>
+                <span className="block text-brand-cocoa" style={hStyle(c, 'hero_headline_line2')}>{c.hero_headline_line2}</span>
+                <em className="block font-display italic text-brand-ochre" style={hStyle(c, 'hero_headline_italic')}>{c.hero_headline_italic}</em>
               </h1>
-              <p className="mt-6 max-w-md font-display text-xl italic text-brand-cocoa/70">{<span style={hStyle(c, 'hero_subheadline')}>{c.hero_subheadline}</span>}</p>
+              <p className="mt-5 max-w-md font-display text-xl italic text-brand-cocoa/70">{<span style={hStyle(c, 'hero_subheadline')}>{c.hero_subheadline}</span>}</p>
               <div className="mt-6 flex flex-wrap items-center gap-8">
                 <a href="#menu" className="font-mono text-[11px] uppercase tracking-widest2 text-brand-cocoa">
                   <span className="border-b border-brand-cocoa pb-1">View the menu</span>
