@@ -745,12 +745,7 @@ export const HomePage = () => {
                       ? <img loading="lazy" src={galleryImgs[1]} alt="Gallery 2" className="w-full h-full object-cover" />
                       : <div className="canvas-img-dark w-full h-full" />}
                   </div>
-                  <div className="col-span-6 aspect-square md:col-span-4 overflow-hidden rounded-lg">
-                    {galleryImgs[2]
-                      ? <img loading="lazy" src={galleryImgs[2]} alt="Gallery 3" className="w-full h-full object-cover" />
-                      : <div className="canvas-img-dark w-full h-full" />}
-                  </div>
-                  <div className="col-span-6 aspect-square md:col-span-4 overflow-hidden rounded-lg">
+                  <div className="col-span-12 aspect-[3/2] md:col-span-4 overflow-hidden rounded-lg">
                     {galleryImgs[3]
                       ? <img loading="lazy" src={galleryImgs[3]} alt="Gallery 4" className="w-full h-full object-cover" />
                       : <div className="canvas-img w-full h-full" />}
