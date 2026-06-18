@@ -615,7 +615,7 @@ export const HomePage = () => {
               </div>
             </div>
                           {menuCategories.length > 0 ? (
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                   {menuCategories.map((group) => (
                     <div key={group.id} className="rounded-lg border border-brand-cocoa/10 bg-brand-shell p-6 overflow-hidden relative" style={MENU_CARD_IMAGES[group.id] ? { backgroundImage: 'url(' + MENU_CARD_IMAGES[group.id] + ')', backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
               {!!MENU_CARD_IMAGES[group.id] && <div className="absolute inset-0" style={{ background: 'rgba(245,241,234,0.88)' }} />}
@@ -643,7 +643,7 @@ export const HomePage = () => {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                   {[
                     { title: 'Main Dishes', note: 'Take Away £15 / Eat-In £17', items: ['Banku & Soup', 'Fufu & Soup', 'Jollof & Goat Meat'] },
                     { title: 'Soups', note: '£12.00', items: ['Light Soup', 'Palm Soup', 'Peanut Soup'] },
