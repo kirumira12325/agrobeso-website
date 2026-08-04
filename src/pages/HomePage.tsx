@@ -235,6 +235,17 @@ export const HomePage = () => {
     setHeroSlideIdx(0);
   }, [dishImgs, heroSlideshowSlugs]);
 
+  // Preload the first hero image for faster LCP once its URL is known
+  useEffect(() => {
+    const url = heroSlideshow[0]?.imgUrl || heroImg;
+    if (!url || document.querySelector(`link[rel="preload"][href="${url}"]`)) return;
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = url;
+    document.head.appendChild(link);
+  }, [heroSlideshow, heroImg]);
+
   useEffect(() => {
     supabase
       .from('site_content')
@@ -513,7 +524,7 @@ export const HomePage = () => {
               <h1 aria-label="A taste of West Africa in London" className="display" style={{fontSize:'clamp(30px,4.6vw,68px)',lineHeight:1.08,letterSpacing:'-0.01em'}}>
                 <span className="block text-brand-clay" style={hStyle(c, 'hero_headline_line1')}>{c.hero_headline_line1}</span>
                 <span className="block text-brand-cocoa" style={hStyle(c, 'hero_headline_line2')}>{c.hero_headline_line2}</span>
-                <em className="block font-display italic text-brand-ochre" style={hStyle(c, 'hero_headline_italic')}>{c.hero_headline_italic}</em>
+                <em className="block font-display italic text-brand-ochreText" style={hStyle(c, 'hero_headline_italic')}>{c.hero_headline_italic}</em>
               </h1>
               <p className="mt-5 max-w-md font-display text-xl italic text-brand-cocoa/70">{<span style={hStyle(c, 'hero_subheadline')}>{c.hero_subheadline}</span>}</p>
               <div className="mt-6 flex flex-wrap items-center gap-8">
@@ -539,7 +550,14 @@ export const HomePage = () => {
                         pointerEvents: idx === heroSlideIdx ? 'auto' : 'none',
                       }}
                     >
-                      <img loading="lazy" src={slide.imgUrl} alt={slide.name} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}} />
+                      <img
+                        loading="eager"
+                        fetchPriority={idx === 0 ? 'high' : undefined}
+                        src={slide.imgUrl}
+                        alt={slide.name}
+                        className={idx === heroSlideIdx ? 'animate-kenburns' : undefined}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-10 text-brand-bone">
                         <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/70">No. {String(slide.num).padStart(2,'0')} / Of the season</p>
                         <p className="mt-4 font-display text-3xl italic">{slide.name}</p>
@@ -570,7 +588,13 @@ export const HomePage = () => {
                 </div>
               ) : heroImg ? (
                 <div className="aspect-[4/5] w-full overflow-hidden rounded-lg relative">
-                  <img loading="lazy" src={heroImg} alt="Agrobeso hero" className="w-full h-full object-cover" />
+                  <img
+                    loading="eager"
+                    fetchPriority="high"
+                    src={heroImg}
+                    alt="Agrobeso hero"
+                    className="w-full h-full object-cover animate-kenburns"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-10 text-brand-bone">
                     <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/70">No. 01 / Of the season</p>
                     <p className="mt-4 font-display text-3xl italic">{<span style={hStyle(c, 'hero_featured_dish')}>{c.hero_featured_dish}</span>}</p>
@@ -617,8 +641,7 @@ export const HomePage = () => {
                           {menuCategories.length > 0 ? (
                 <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                   {menuCategories.map((group) => (
-                    <div key={group.id} className="rounded-lg border border-brand-cocoa/10 bg-brand-shell p-6 overflow-hidden relative" style={MENU_CARD_IMAGES[group.id] ? { backgroundImage: 'url(' + MENU_CARD_IMAGES[group.id] + ')', backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
-              {!!MENU_CARD_IMAGES[group.id] && <div className="absolute inset-0" style={{ background: 'rgba(245,241,234,0.88)' }} />}
+                    <div key={group.id} className="rounded-lg border border-brand-cocoa/10 bg-brand-shell p-6 overflow-hidden relative">
                     <div className="relative z-10">
                       <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                         <p className="eyebrow text-sm font-bold tracking-wide">{group.title}</p>
@@ -829,13 +852,13 @@ export const HomePage = () => {
         <footer id="footer" className="bg-brand-cocoa text-brand-bone">
           <div className="section-shell grid grid-cols-1 gap-12 py-20 md:grid-cols-12">
             <div className="md:col-span-5">
-              <p className="font-display text-4xl font-light tracking-tightest">Agrobeso</p>
+              <p className="font-display text-4xl font-light italic tracking-tightest">Agrobeso</p>
               <p className="mt-4 max-w-xs font-display text-sm italic text-brand-bone/60">{<span style={hStyle(c, 'footer_tagline')}>{c.footer_tagline}</span>}</p>
             </div>
             <div className="md:col-span-3">
               <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/50">Visit</p>
               <ul className="mt-4 space-y-2 text-sm text-brand-bone/80">
-                {locations.map((l) => (<li key={l.id}>{l.shortName}</li>))}
+                {locations.map((l) => (<li key={l.id}><a href="#locations" className="hover:text-brand-ochre">{l.shortName}</a></li>))}
               </ul>
             </div>
             <div className="md:col-span-2">
