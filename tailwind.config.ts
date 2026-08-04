@@ -17,6 +17,7 @@ export default {
                                         shell: '#EBE3D4',
                                         clay: '#B8593A',
                                         ochre: '#D4A574',
+                                        ochreText: '#875524',
                                         cocoa: '#1F1410',
                                         ink: '#2A1810',
                                         moss: '#3B5D43'

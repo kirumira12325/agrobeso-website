@@ -112,7 +112,7 @@ export default function ReservePage() {
   return (
     <div style={{background:'#f5f1ea',minHeight:'100vh',fontFamily:'Georgia,serif'}}>
       <nav style={{background:'#f5f1ea',borderBottom:'1px solid #d4c5a9',padding:'1rem 2rem',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-        <Link to="/" style={{fontFamily:'Fraunces, serif',fontSize:'1.5rem',fontWeight:300,fontStyle:'italic',color:'#2c1810',textDecoration:'none',letterSpacing:'-0.02em'}}>Agrobeso</Link>
+        <Link to="/" style={{fontFamily:'Fraunces, serif',fontSize:'1.5rem',fontWeight:300,fontStyle:'italic',color:'#2c1810',textDecoration:'none',letterSpacing:'-0.04em'}}>Agrobeso</Link>
         <Link to="/" style={{fontSize:'0.8rem',letterSpacing:'0.1em',color:'#8b7355',textDecoration:'none',textTransform:'uppercase'}}>← Back to site</Link>
       </nav>
       <div style={{maxWidth:'600px',margin:'0 auto',padding:'2rem 1.5rem 4rem'}}>
