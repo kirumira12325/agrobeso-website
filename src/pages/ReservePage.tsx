@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { applyPageSeo } from '@/lib/seo';
 import { Link } from 'react-router-dom';
 
 const SUPABASE_URL = 'https://kbopqzhfckbhkumiinmk.supabase.co';
@@ -65,6 +66,16 @@ const backBtnStyle: React.CSSProperties = {
 };
 
 export default function ReservePage() {
+  useEffect(
+    () =>
+      applyPageSeo({
+        title: 'Reserve a Table | Agrobeso – Ghanaian Restaurant in Peckham & Thornton Heath',
+        description:
+          'Book a table at Agrobeso in Peckham or Thornton Heath. Authentic Ghanaian and West African food in South London – jollof, waakye, banku, fufu and more.',
+        path: '/reserve',
+      }),
+    []
+  );
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<FormData>({ location:'',date:'',time:'',name:'',phone:'',email:'',guests:2,notes:'' });
   const [submitting, setSubmitting] = useState(false);

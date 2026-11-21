@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { applyPageSeo } from "@/lib/seo";
 import { agrobesoSupabase as supabase, AGROBESO_STORAGE_URL } from "../integrations/supabase/agrobeso-client";
 
 const ADMIN_PASSWORD = "Agrobeso2024";
@@ -853,6 +854,10 @@ function ReservationsTab({ supabase: _sb }: { supabase: any }) {
 
 // ─── Main Admin component ─────────────────────────────────────────────────────
 export default function Admin() {
+  useEffect(
+    () => applyPageSeo({ title: 'Admin | Agrobeso', description: '', path: '/admin', noindex: true }),
+    []
+  );
   const [authed, setAuthed] = useState(() => sessionStorage.getItem('adminAuthed') === 'true');
   const [pw, setPw] = useState("");
   const [showPassword, setShowPassword] = useState(false);
