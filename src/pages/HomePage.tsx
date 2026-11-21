@@ -1,5 +1,5 @@
 import { useState, useEffect, CSSProperties } from 'react';
-import { buildMapUrl, buildRestaurantSchema } from '@/lib/schema';
+import { buildMapUrl } from '@/lib/schema';
 import { agrobesoSupabase as supabase } from '../integrations/supabase/agrobeso-client';
 
 const STORAGE_URL = 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images';
@@ -128,7 +128,6 @@ const MENU_CARD_IMAGES: Record<string, string> = {
 
 
 export const HomePage = () => {
-  const schema = buildRestaurantSchema();
   const [c, setC] = useState<Record<string, string>>(defaultContent);
   const [dishImgs, setDishImgs] = useState<Record<string, string>>({});
   const [galleryImgs, setGalleryImgs] = useState<string[]>([]);
@@ -927,7 +926,6 @@ export const HomePage = () => {
         </div>
       </div>
 
-      <script type="application/ld+json">{JSON.stringify(schema)}</script>
     </>
   );
 };
