@@ -5,7 +5,7 @@ import { agrobesoSupabase as supabase } from '../integrations/supabase/agrobeso-
 const STORAGE_URL = 'https://kbopqzhfckbhkumiinmk.supabase.co/storage/v1/object/public/images';
 
 const navItems = [
-  { label: 'Menu', href: '#menu' },
+  { label: 'Menu', href: '/menu' },
   { label: 'Locations', href: '#locations' },
   { label: 'Heritage', href: '#about' },
   { label: 'Gallery', href: '#gallery' },
@@ -727,6 +727,7 @@ export const HomePage = () => {
                   <div className="mt-10 flex flex-wrap gap-6 font-mono text-[11px] uppercase tracking-widest2">
                     <a href={buildMapUrl(location.mapsQuery)} target="_blank" rel="noopener noreferrer" className="border-b border-brand-cocoa pb-1 text-brand-cocoa transition hover:text-brand-clay">Directions &rarr;</a>
                     <a href={location.phoneHref} className="border-b border-brand-cocoa/30 pb-1 text-brand-cocoa/70 transition hover:border-brand-cocoa hover:text-brand-cocoa">Call</a>
+                    <a href={`/${location.id}`} className="border-b border-brand-cocoa/30 pb-1 text-brand-cocoa/70 transition hover:border-brand-cocoa hover:text-brand-cocoa">About {location.shortName}</a>
                   </div>
                   {locationImgs[location.id.replace('-', '')] && (
                     <div className="mt-8 overflow-hidden rounded-lg">
@@ -857,7 +858,7 @@ export const HomePage = () => {
             <div className="md:col-span-3">
               <p className="font-mono text-[10px] uppercase tracking-widest2 text-brand-bone/50">Visit</p>
               <ul className="mt-4 space-y-2 text-sm text-brand-bone/80">
-                {locations.map((l) => (<li key={l.id}><a href="#locations" className="hover:text-brand-ochre">{l.shortName}</a></li>))}
+                {locations.map((l) => (<li key={l.id}><a href={`/${l.id}`} className="hover:text-brand-ochre">{l.shortName}</a></li>))}
               </ul>
             </div>
             <div className="md:col-span-2">
